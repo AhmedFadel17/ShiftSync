@@ -15,8 +15,8 @@ export default function UsersPage() {
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState<UserRole | undefined>(undefined);
-  const [selectedActive, setSelectedActive] = useState<boolean | undefined>(undefined);
+  const [selectedRole, setSelectedRole] = useState<UserRole | undefined>(UserRole.User);
+  const [selectedActive, setSelectedActive] = useState<boolean | undefined>(true);
 
   // Edit Modal State
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -166,7 +166,6 @@ export default function UsersPage() {
             <thead className="bg-surface-container-low/70 text-on-surface-variant font-label-mono text-[11px] uppercase tracking-wider border-b border-outline-variant/15 font-semibold">
               <tr>
                 <th className="px-5 py-3.5">Staff Member</th>
-                <th className="px-5 py-3.5">Identifier</th>
                 <th className="px-5 py-3.5">Role</th>
                 <th className="px-5 py-3.5">Status</th>
                 <th className="px-5 py-3.5">Joined</th>
@@ -213,9 +212,7 @@ export default function UsersPage() {
                         </div>
                       </Link>
                     </td>
-                    <td className="px-5 py-3.5 font-label-mono text-[11px] text-tertiary">
-                      {u.userName ? `@${u.userName}` : u.id.substring(0, 8)}
-                    </td>
+
                     <td className="px-5 py-3.5">
                       <RoleBadge role={u.role} />
                     </td>
@@ -233,14 +230,7 @@ export default function UsersPage() {
                       >
                         <span className="material-symbols-outlined text-[16px]">account_circle</span>
                       </Link>
-                      <button
-                        onClick={() => handleOpenEdit(u)}
-                        className="p-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors inline-flex items-center justify-center shadow-xs"
-                        title="Edit User"
-                        type="button"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">edit</span>
-                      </button>
+
                       <button
                         onClick={() => setDeletingUser(u)}
                         className="p-1.5 rounded-lg bg-surface-container-low hover:bg-error-container text-on-surface-variant hover:text-error transition-colors inline-flex items-center justify-center shadow-xs"

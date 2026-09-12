@@ -3,6 +3,7 @@ using ShiftSync.API.Data;
 using ShiftSync.API.DTOs.Common;
 using ShiftSync.API.DTOs.Users;
 using ShiftSync.API.Models.Entities;
+using ShiftSync.API.Models.Enums;
 
 namespace ShiftSync.API.Repositories.Users;
 
@@ -16,8 +17,8 @@ public class UserRepository : BaseRepository<ApplicationUser>, IUserRepository
     {
         var query = _dbSet.AsQueryable();
 
-        // if (filter.IsActive.HasValue)
-        //     query = query.Where(s => s.IsActive == filter.IsActive.Value);
+        if (filter.IsActive.HasValue)
+            query = query.Where(s => s.IsActive == filter.IsActive.Value);
         if (filter.Role.HasValue)
             query = query.Where(s => s.Role == filter.Role.Value);
 
