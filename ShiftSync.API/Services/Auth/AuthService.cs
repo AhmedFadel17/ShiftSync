@@ -65,7 +65,17 @@ public class AuthService : IAuthService
     private AuthResponseDto BuildAuthResponse(ApplicationUser user)
     {
         var jwtSettings = _configuration.GetSection("Jwt");
-        var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
+
+        var jwtKey = jwtSettings["Key"]
+            ?? throw new InvalidOperationException("JWT Key is not configured.");
+
+        var issuer = jwtSettings["Issuer"]
+            ?? throw new InvalidOperationException("JWT Issuer is not configured.");
+
+        var audience = jwtSettings["Audience"]
+            ?? throw new InvalidOperationException("JWT Audience is not configured.");
+
+        var key = Encoding.UTF8.GetBytes(jwtKey);
         var expiresAt = DateTime.UtcNow.AddMinutes(60);
 
         var claims = new List<Claim>
@@ -81,8 +91,8 @@ public class AuthService : IAuthService
         {
             Subject = new ClaimsIdentity(claims),
             Expires = expiresAt,
-            Issuer = jwtSettings["Issuer"],
-            Audience = jwtSettings["Audience"],
+            Issuer = issuer,
+            Audience = audience,
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(key),
                 SecurityAlgorithms.HmacSha256Signature)

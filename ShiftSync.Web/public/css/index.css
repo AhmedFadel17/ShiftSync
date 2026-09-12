@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-on-surface font-body selection:bg-primary/30;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-card-bg backdrop-blur-xl border border-white/5 shadow-2xl;
+  }
+
+  .glass-panel {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(51, 65, 85, 0.8);
+  }
+
+  .glow-border {
+    border: 1px solid #adc6ff;
+    box-shadow: 0 0 10px rgba(173, 198, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .glow-border:hover {
+    box-shadow: 0 0 20px rgba(173, 198, 255, 0.5);
+    border-color: #4d8eff;
+  }
+
+  .red-action {
+    background: #a40217;
+    color: white;
+    box-shadow: 0 0 15px rgba(164, 2, 23, 0.4);
+    transition: all 0.3s ease;
+  }
+
+  .red-action:hover {
+    background: #ffb3ad;
+    color: #410004;
+    box-shadow: 0 0 25px rgba(255, 179, 173, 0.6);
+  }
+
+  .hero-grid {
+    background-size: 40px 40px;
+    background-image: 
+      linear-gradient(to right, rgba(173, 198, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(173, 198, 255, 0.05) 1px, transparent 1px);
+    mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  }
+
+  .neon-border-purple {
+    @apply border-accent-purple/30 shadow-[0_0_15px_rgba(138, 43, 226, 0.2)];
+  }
+
+  .neon-border-cyan {
+    @apply border-accent-cyan/30 shadow-[0_0_15px_rgba(0, 242, 255, 0.2)];
+  }
+
+  .text-gradient-purple {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-accent-purple to-accent-pink;
+  }
+
+  .text-gradient-primary {
+    background: linear-gradient(to right, #ddb7ff, #4cd7f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .cinematic-shadow {
+    box-shadow: 0 20px 50px rgba(6, 14, 32, 0.6);
+  }
+
+  /* Premium Toast Styles */
+  .premium-toast {
+    @apply !bg-surface-container-high !backdrop-blur-xl !rounded-xl !p-4 !border !shadow-2xl !font-body;
+  }
+
+  .premium-toast.success {
+    @apply !border-green-500 !bg-green-100/90 !text-green-700;
+  }
+
+  .premium-toast.error {
+    @apply !border-red-400 !bg-red-200/90 !text-red-500;
+  }
+
+  .premium-toast.warning {
+    @apply !border-yellow-700 !bg-yellow-100/90 !text-yellow-700;
+  }
+
+  .premium-toast.info {
+    @apply !border-gray-400 !bg-gray-100/90 !text-gray-500;
+  }
+
+  .btn-premium {
+    @apply bg-gradient-to-br from-accent-purple via-accent-purple to-accent-pink text-white shadow-[0_0_20px_rgba(138, 43, 226, 0.4)] hover:shadow-[0_0_30px_rgba(138, 43, 226, 0.6)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 font-bold;
+  }
+}
+
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
+}
+
+/* Modal animation */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* FullCalendar height fixup inside dashboard layout */
+.fc,
+.fc-view-harness,
+.fc-view {
+  height: 100% !important;
+}
