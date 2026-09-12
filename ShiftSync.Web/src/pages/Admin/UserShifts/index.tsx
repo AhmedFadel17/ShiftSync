@@ -10,16 +10,6 @@ import { UserShift, CreateUserShiftDto } from '@/types/shiftsync';
 import Pagination from '@/components/ui/Pagination';
 import Modal from '@/components/ui/Modals';
 import { toast } from 'sonner';
-import {
-  FaCalendarAlt,
-  FaPlus,
-  FaTrash,
-  FaClock,
-  FaUser,
-  FaSpinner,
-  FaCheckCircle,
-  FaFilter,
-} from 'react-icons/fa';
 
 export default function UserShiftsPage() {
   const [pageNumber, setPageNumber] = useState(1);
@@ -96,17 +86,26 @@ export default function UserShiftsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col w-full px-margin md:px-space-xl pb-space-xl space-y-space-lg max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <FaCalendarAlt className="text-cyan-400" /> Shift Assignments
-          </h1>
-          <p className="text-white/40 text-sm mt-1">
-            Schedule employees to designated shifts by date and track work allocations.
-          </p>
+      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-space-sm">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 shadow-sm mt-0.5">
+            <span className="material-symbols-outlined text-[22px]">event_available</span>
+          </div>
+          <div>
+            <span className="font-label-mono text-label-mono text-tertiary uppercase tracking-wider">
+              Roster Assignments
+            </span>
+            <h1 className="font-headline-lg-mobile lg:text-headline-lg text-headline-lg-mobile text-on-surface tracking-tight font-bold">
+              Shift Assignments
+            </h1>
+            <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+              Schedule employees to designated shifts by date and track work allocations.
+            </p>
+          </div>
         </div>
+
         <button
           onClick={() => {
             setIsAssignOpen(true);
@@ -114,34 +113,33 @@ export default function UserShiftsPage() {
               setAssignForm((prev) => ({ ...prev, shiftId: shiftsList[0].id }));
             }
           }}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-sm transition-colors shadow-lg shadow-cyan-900/30 self-start sm:self-auto"
+          className="h-10 px-4 rounded-xl bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98] transition-all hover:opacity-90 self-start sm:self-auto"
+          type="button"
         >
-          <FaPlus className="text-xs" /> Assign Shift
+          <span className="material-symbols-outlined text-[18px]">add</span>
+          <span>Assign Shift</span>
         </button>
-      </div>
+      </section>
 
       {/* Filter Bar */}
-      <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-4 backdrop-blur-md flex flex-wrap gap-4 items-center justify-between">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <FaFilter className="text-white/40 text-xs" />
-            <select
-              value={selectedUserId}
-              onChange={(e) => {
-                setSelectedUserId(e.target.value);
-                setPageNumber(1);
-              }}
-              aria-label="Filter by employee"
-              className="bg-slate-950/60 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
-            >
-              <option value="">All Employees</option>
-              {usersList.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.fullName} (@{u.userName})
-                </option>
-              ))}
-            </select>
-          </div>
+      <section className="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-space-md shadow-sm flex flex-wrap gap-3 items-center justify-between">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <select
+            value={selectedUserId}
+            onChange={(e) => {
+              setSelectedUserId(e.target.value);
+              setPageNumber(1);
+            }}
+            aria-label="Filter by employee"
+            className="h-10 bg-surface-container-low/60 border border-outline-variant/25 rounded-xl px-3 text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all cursor-pointer shadow-xs"
+          >
+            <option value="">All Employees</option>
+            {usersList.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.fullName} (@{u.userName})
+              </option>
+            ))}
+          </select>
 
           <select
             value={selectedShiftId === undefined ? '' : selectedShiftId}
@@ -150,7 +148,7 @@ export default function UserShiftsPage() {
               setPageNumber(1);
             }}
             aria-label="Filter by shift"
-            className="bg-slate-950/60 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
+            className="h-10 bg-surface-container-low/60 border border-outline-variant/25 rounded-xl px-3 text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all cursor-pointer shadow-xs"
           >
             <option value="">All Shifts</option>
             {shiftsList.map((s) => (
@@ -161,9 +159,9 @@ export default function UserShiftsPage() {
           </select>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-white/50">From:</span>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex items-center gap-1.5">
+            <span className="font-label-mono text-[11px] text-tertiary">From:</span>
             <input
               type="date"
               value={dateFrom}
@@ -172,12 +170,12 @@ export default function UserShiftsPage() {
                 setPageNumber(1);
               }}
               aria-label="Filter from date"
-              className="bg-slate-950/60 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+              className="h-10 bg-surface-container-low/60 border border-outline-variant/25 rounded-xl px-2.5 text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all shadow-xs"
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-white/50">To:</span>
+          <div className="flex items-center gap-1.5">
+            <span className="font-label-mono text-[11px] text-tertiary">To:</span>
             <input
               type="date"
               value={dateTo}
@@ -186,71 +184,88 @@ export default function UserShiftsPage() {
                 setPageNumber(1);
               }}
               aria-label="Filter to date"
-              className="bg-slate-950/60 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+              className="h-10 bg-surface-container-low/60 border border-outline-variant/25 rounded-xl px-2.5 text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all shadow-xs"
             />
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Table */}
-      <div className="bg-slate-900/60 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-md">
+      <section className="bg-surface-container-lowest border border-outline-variant/20 rounded-xl shadow-sm overflow-hidden flex flex-col">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-white/80">
-            <thead className="bg-white/[0.03] text-xs uppercase tracking-wider text-white/40 border-b border-white/10 font-semibold">
+          <table className="w-full text-left text-xs text-on-surface">
+            <thead className="bg-surface-container-low/70 text-on-surface-variant font-label-mono text-[11px] uppercase tracking-wider border-b border-outline-variant/15 font-semibold">
               <tr>
-                <th className="px-6 py-4">Employee</th>
-                <th className="px-6 py-4">Assigned Shift</th>
-                <th className="px-6 py-4">Shift Hours</th>
-                <th className="px-6 py-4">Schedule Date</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+                <th className="px-5 py-3.5">Employee</th>
+                <th className="px-5 py-3.5">Assigned Shift</th>
+                <th className="px-5 py-3.5">Shift Window</th>
+                <th className="px-5 py-3.5">Date</th>
+                <th className="px-5 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-outline-variant/10">
               {isLoading || isFetching ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-white/40">
-                    <FaSpinner className="animate-spin text-2xl mx-auto text-cyan-400 mb-2" />
+                  <td colSpan={5} className="px-6 py-12 text-center text-on-surface-variant">
+                    <span className="material-symbols-outlined animate-spin text-2xl text-primary mb-2 block">
+                      refresh
+                    </span>
                     Loading shift assignments...
                   </td>
                 </tr>
               ) : userShifts.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-white/40">
+                  <td colSpan={5} className="px-6 py-12 text-center text-on-surface-variant">
+                    <span className="material-symbols-outlined text-3xl text-outline mb-1 block">
+                      event_busy
+                    </span>
                     No assignments found for the selected criteria.
                   </td>
                 </tr>
               ) : (
                 userShifts.map((assignment) => (
-                  <tr key={assignment.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="font-semibold text-white">
-                        {assignment.user?.fullName ?? assignment.userId}
+                  <tr key={assignment.id} className="hover:bg-surface-container-low/40 transition-colors">
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-secondary-container/50 border border-secondary/20 text-on-secondary-container font-bold flex items-center justify-center text-xs shrink-0">
+                          {assignment.user?.fullName?.charAt(0)?.toUpperCase() ?? 'E'}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-semibold text-on-surface truncate">
+                            {assignment.user?.fullName ?? assignment.userId}
+                          </div>
+                          {assignment.user?.email && (
+                            <div className="text-[11px] text-on-surface-variant truncate">
+                              {assignment.user.email}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      {assignment.user?.email && (
-                        <div className="text-xs text-white/40">{assignment.user.email}</div>
-                      )}
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="font-semibold text-cyan-300">
+                    <td className="px-5 py-3.5">
+                      <span className="font-semibold text-primary">
                         {assignment.shift?.name ?? `Shift #${assignment.shiftId}`}
-                      </div>
+                      </span>
                     </td>
-                    <td className="px-6 py-4 font-mono text-xs text-white/70">
+                    <td className="px-5 py-3.5 font-label-mono text-[11px] text-tertiary">
                       {assignment.shift?.startTime} – {assignment.shift?.endTime}
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 text-white/80 font-mono text-xs border border-white/10">
-                        <FaCalendarAlt className="text-cyan-400 text-[10px]" />
+                    <td className="px-5 py-3.5">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-surface-container text-on-surface font-label-mono text-[11px] border border-outline-variant/30">
+                        <span className="material-symbols-outlined text-[13px] text-primary">
+                          calendar_today
+                        </span>
                         {assignment.date}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-5 py-3.5 text-right">
                       <button
                         onClick={() => setDeletingAssignment(assignment)}
-                        className="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 hover:text-red-400 text-white/60 transition-colors"
+                        className="p-1.5 rounded-lg bg-surface-container-low hover:bg-error-container text-on-surface-variant hover:text-error transition-colors inline-flex items-center justify-center shadow-xs"
                         title="Remove Assignment"
+                        type="button"
                       >
-                        <FaTrash className="text-xs" />
+                        <span className="material-symbols-outlined text-[16px]">delete</span>
                       </button>
                     </td>
                   </tr>
@@ -262,7 +277,7 @@ export default function UserShiftsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="p-4 border-t border-white/10 flex justify-center">
+          <div className="p-3.5 border-t border-outline-variant/15 flex justify-center bg-surface-container-lowest">
             <Pagination
               page={pageNumber}
               pageSize={pageSize}
@@ -279,7 +294,7 @@ export default function UserShiftsPage() {
             />
           </div>
         )}
-      </div>
+      </section>
 
       {/* Assign Modal */}
       {isAssignOpen && (
@@ -291,14 +306,14 @@ export default function UserShiftsPage() {
         >
           <form onSubmit={handleAssign} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-white/60 uppercase mb-1">
+              <label className="block text-xs font-semibold text-on-surface-variant uppercase mb-1 font-label-md">
                 Select Employee
               </label>
               <select
                 required
                 value={assignForm.userId}
                 onChange={(e) => setAssignForm({ ...assignForm, userId: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950/60 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                className="w-full h-10 px-3 bg-surface-container-low/50 border border-outline-variant/30 rounded-xl text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all shadow-xs"
               >
                 <option value="">Select an employee...</option>
                 {usersList.map((u) => (
@@ -310,14 +325,14 @@ export default function UserShiftsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-white/60 uppercase mb-1">
+              <label className="block text-xs font-semibold text-on-surface-variant uppercase mb-1 font-label-md">
                 Select Shift
               </label>
               <select
                 required
                 value={assignForm.shiftId}
                 onChange={(e) => setAssignForm({ ...assignForm, shiftId: Number(e.target.value) })}
-                className="w-full px-3.5 py-2.5 bg-slate-950/60 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                className="w-full h-10 px-3 bg-surface-container-low/50 border border-outline-variant/30 rounded-xl text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all shadow-xs"
               >
                 <option value={0}>Select a shift...</option>
                 {shiftsList.map((s) => (
@@ -329,32 +344,36 @@ export default function UserShiftsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-white/60 uppercase mb-1">
-                Date
+              <label className="block text-xs font-semibold text-on-surface-variant uppercase mb-1 font-label-md">
+                Assignment Date
               </label>
               <input
                 type="date"
                 required
                 value={assignForm.date}
                 onChange={(e) => setAssignForm({ ...assignForm, date: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950/60 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                className="w-full h-10 px-3.5 bg-surface-container-low/50 border border-outline-variant/30 rounded-xl text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all shadow-xs"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-surface-container">
               <button
                 type="button"
                 onClick={() => setIsAssignOpen(false)}
-                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 text-sm font-medium transition-colors"
+                className="px-4 py-2 rounded-xl bg-surface-container text-on-surface-variant text-xs font-semibold hover:bg-surface-container-high transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isAssigning}
-                className="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+                className="px-5 py-2 rounded-xl bg-primary text-on-primary text-xs font-semibold hover:opacity-90 transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
               >
-                {isAssigning ? <FaSpinner className="animate-spin text-xs" /> : <FaCheckCircle className="text-xs" />}
+                {isAssigning ? (
+                  <span className="material-symbols-outlined text-sm animate-spin">refresh</span>
+                ) : (
+                  <span className="material-symbols-outlined text-sm">check</span>
+                )}
                 Confirm Assignment
               </button>
             </div>
@@ -362,7 +381,7 @@ export default function UserShiftsPage() {
         </Modal>
       )}
 
-      {/* Delete Modal */}
+      {/* Delete Confirmation Modal */}
       {deletingAssignment && (
         <Modal
           isOpen={true}
@@ -371,18 +390,18 @@ export default function UserShiftsPage() {
           size="sm"
         >
           <div className="space-y-4">
-            <p className="text-sm text-white/70">
-              Are you sure you want to remove this shift assignment for{' '}
-              <span className="font-semibold text-white">
+            <p className="text-xs text-on-surface-variant leading-relaxed">
+              Are you sure you want to remove the shift assignment for{' '}
+              <span className="font-semibold text-on-surface">
                 {deletingAssignment.user?.fullName ?? deletingAssignment.userId}
               </span>{' '}
-              on <span className="font-mono text-cyan-300">{deletingAssignment.date}</span>?
+              on <span className="font-semibold text-on-surface">{deletingAssignment.date}</span>?
             </p>
-            <div className="flex items-center justify-end gap-3 pt-2">
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-surface-container">
               <button
                 type="button"
                 onClick={() => setDeletingAssignment(null)}
-                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 text-sm font-medium transition-colors"
+                className="px-4 py-2 rounded-xl bg-surface-container text-on-surface-variant text-xs font-semibold hover:bg-surface-container-high transition-colors"
               >
                 Cancel
               </button>
@@ -390,10 +409,14 @@ export default function UserShiftsPage() {
                 type="button"
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-error text-on-error text-xs font-semibold hover:opacity-90 transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
               >
-                {isDeleting ? <FaSpinner className="animate-spin text-xs" /> : <FaTrash className="text-xs" />}
-                Remove Assignment
+                {isDeleting ? (
+                  <span className="material-symbols-outlined text-sm animate-spin">refresh</span>
+                ) : (
+                  <span className="material-symbols-outlined text-sm">delete</span>
+                )}
+                Remove
               </button>
             </div>
           </div>

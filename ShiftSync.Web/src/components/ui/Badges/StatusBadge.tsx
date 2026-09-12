@@ -14,29 +14,29 @@ type StatusBadgeVariant =
   | 'closed';
 
 const variantStyles: Record<StatusBadgeVariant, string> = {
-  active:    'bg-accent-green/15 text-accent-green border-accent-green/25',
-  inactive:  'bg-white/5 text-white/40 border-white/10',
-  admin:     'bg-accent-purple/15 text-accent-purple border-accent-purple/25',
-  user:      'bg-primary/15 text-primary border-primary/25',
-  waiting:   'bg-accent-yellow/15 text-accent-yellow border-accent-yellow/25',
-  approved:  'bg-accent-green/15 text-accent-green border-accent-green/25',
-  rejected:  'bg-error/15 text-error border-error/25',
-  completed: 'bg-accent-cyan/15 text-accent-cyan border-accent-cyan/25',
-  open:      'bg-primary/15 text-primary border-primary/25',
-  closed:    'bg-white/5 text-white/40 border-white/10',
+  active:    'bg-secondary-fixed/40 text-on-secondary-fixed border-secondary-fixed/60',
+  inactive:  'bg-surface-container text-on-surface-variant border-outline-variant/40',
+  admin:     'bg-primary/10 text-primary border-primary/30',
+  user:      'bg-surface-container-high text-on-surface-variant border-outline-variant/30',
+  waiting:   'bg-tertiary-fixed text-tertiary border-tertiary-fixed-dim',
+  approved:  'bg-secondary-fixed/40 text-on-secondary-fixed border-secondary-fixed/60',
+  rejected:  'bg-error-container text-on-error-container border-error/30',
+  completed: 'bg-secondary-container/60 text-on-secondary-container border-secondary/30',
+  open:      'bg-primary/10 text-primary border-primary/25',
+  closed:    'bg-surface-container text-on-surface-variant border-outline-variant/40',
 };
 
 const variantDots: Record<StatusBadgeVariant, string> = {
-  active:    'bg-accent-green',
-  inactive:  'bg-white/30',
-  admin:     'bg-accent-purple',
-  user:      'bg-primary',
-  waiting:   'bg-accent-yellow',
-  approved:  'bg-accent-green',
+  active:    'bg-secondary',
+  inactive:  'bg-outline',
+  admin:     'bg-primary',
+  user:      'bg-tertiary',
+  waiting:   'bg-tertiary',
+  approved:  'bg-secondary',
   rejected:  'bg-error',
-  completed: 'bg-accent-cyan',
+  completed: 'bg-secondary',
   open:      'bg-primary',
-  closed:    'bg-white/30',
+  closed:    'bg-outline',
 };
 
 interface StatusBadgeProps {

@@ -4,6 +4,7 @@ using ShiftSync.API.DTOs.Attendances;
 using ShiftSync.API.DTOs.BreakTypes;
 using ShiftSync.API.DTOs.Common;
 using ShiftSync.API.DTOs.Shifts;
+using ShiftSync.API.DTOs.Users;
 using ShiftSync.API.DTOs.UserShifts;
 using ShiftSync.API.Models.Entities;
 
@@ -53,5 +54,8 @@ public class MappingProfile : Profile
         // ── AttendanceBreaks ────────────────────────────────────────────
         CreateMap<AttendanceBreak, AttendanceBreakResponseDto>()
             .ForMember(dest => dest.BreakTypeName, opt => opt.MapFrom(src => src.BreakType.Name));
+
+        CreateMap<ApplicationUser, UserResponseDto>();
+
     }
 }

@@ -3,7 +3,7 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   * {
@@ -11,12 +11,14 @@
   }
 
   html, body {
+    width: 100vw;
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    font-family: 'Inter', system-ui, sans-serif;
-    background-color: #0b1326;
-    color: #F5F5F7;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background-color: #f8f9ff;
+    color: #0b1c30;
+    overscroll-behavior: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -24,23 +26,44 @@
   #root {
     min-height: 100vh;
   }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  main > :first-child {
+    margin-top: 0 !important;
+  }
+
+  main > :last-child {
+    margin-bottom: 0 !important;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @layer components {
   .glass-card {
-    background: rgba(23, 31, 51, 0.8);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(199, 196, 215, 0.4);
   }
 
   .custom-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    scrollbar-color: rgba(70, 69, 84, 0.2) transparent;
   }
 
   .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
+    display: block;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
@@ -48,32 +71,32 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(70, 69, 84, 0.2);
     border-radius: 2px;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-semibold text-sm transition-all duration-200 hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-on-primary font-semibold text-sm transition-all duration-200 hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 font-semibold text-sm transition-all duration-200 hover:bg-white/10 hover:text-white active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-high text-primary font-semibold text-sm transition-all duration-200 hover:bg-surface-container-highest active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-error/10 border border-error/30 text-error font-semibold text-sm transition-all duration-200 hover:bg-error/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-error-container text-on-error-container font-semibold text-sm transition-all duration-200 hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .input-field {
-    @apply w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-200;
+    @apply w-full px-3.5 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/50 text-on-surface placeholder:text-outline text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all duration-200 shadow-sm;
   }
 
   .page-container {
-    @apply space-y-6;
+    @apply space-y-6 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8;
   }
 
   .section-card {
-    @apply bg-surface-container rounded-2xl border border-white/5 overflow-hidden;
+    @apply bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container-high/60 overflow-hidden;
   }
 }
 

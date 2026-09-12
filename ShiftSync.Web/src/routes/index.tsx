@@ -1,7 +1,9 @@
 import { AppRoute } from '@/types/ui';
 import AdminDashboard from '@/pages/Admin/Dashboard';
 import UsersPage from '@/pages/Admin/Users';
+import UserProfilePage from '@/pages/Admin/Users/Profile';
 import ShiftsPage from '@/pages/Admin/Shifts';
+import ShiftDetailsPage from '@/pages/Admin/Shifts/Details';
 import UserShiftsPage from '@/pages/Admin/UserShifts';
 import BreakTypesPage from '@/pages/Admin/BreakTypes';
 import AttendancesPage from '@/pages/Admin/Attendances';
@@ -22,9 +24,19 @@ export const AdminRoutes: AppRoute[] = [
     element: <UsersPage />,
   },
   {
+    path: '/admin/users/:id',
+    label: 'User Profile',
+    element: <UserProfilePage />,
+  },
+  {
     path: '/admin/shifts',
     label: 'Shifts',
     element: <ShiftsPage />,
+  },
+  {
+    path: '/admin/shifts/:id',
+    label: 'Shift Details',
+    element: <ShiftDetailsPage />,
   },
   {
     path: '/admin/user-shifts',

@@ -69,36 +69,43 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-dashboard-bg flex items-center justify-center p-4">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-purple/5 rounded-full blur-3xl" />
-      </div>
-
+    <div className="min-h-screen bg-surface flex items-center justify-center p-4">
       <div className="relative w-full max-w-md">
-        {/* Logo */}
+        {/* Logo & Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/20 border border-primary/30 mb-4">
-            <span className="material-symbols-outlined text-primary text-3xl">schedule</span>
+          <div className="inline-flex items-center justify-center mb-4">
+            <img
+              alt="ShiftSync Logo"
+              className="h-12 w-auto object-contain shrink-0"
+              src="https://lh3.googleusercontent.com/aida/AEtjO1VLFCQVXaxkNKwJMzPnRjNoh0pmSrzDk0GYLLLOGZDWKzFbjAzQij247WFq2AVq5pgcnVzSf1HmIcibA6B2DGdAGEkKONcgO7c3e5Y0Upl9itoLM4uQEUU70ZsWk8tF2nEHxixzlHWdSNIG9Q03uudPF5pEOKbcq3HuZ2Uh6AksAd8qyMPbO53K2suZ8YQ2eJcbX4JHIH77TngpM5yoq4Fpez7HLAe8XqUK-ciH2oeeeEgNLSQmP4PqOA"
+            />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">ShiftSync</h1>
-          <p className="text-white/40 text-sm mt-1">Admin Dashboard</p>
+          <h1 className="text-2xl font-bold text-on-surface tracking-tight font-headline-lg-mobile">
+            ShiftSync
+          </h1>
+          <p className="text-on-surface-variant text-xs mt-1 font-body-sm">
+            Workforce Management Admin Portal
+          </p>
         </div>
 
         {/* Card */}
-        <div className="bg-surface-container rounded-2xl border border-white/10 p-8 shadow-2xl">
-          <h2 className="text-lg font-semibold text-white mb-1">Sign In</h2>
-          <p className="text-white/40 text-sm mb-6">Enter your admin credentials to continue.</p>
+        <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-8 shadow-xl">
+          <h2 className="text-base font-bold text-on-surface mb-1 font-headline-md">Sign In</h2>
+          <p className="text-on-surface-variant text-xs mb-6 font-body-sm">
+            Enter your administrative credentials to continue.
+          </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-xs font-semibold text-white/60 mb-1.5 uppercase tracking-wider">
+              <label
+                htmlFor="email"
+                className="block text-xs font-semibold text-on-surface-variant mb-1 font-label-md uppercase tracking-wider"
+              >
                 Email Address
               </label>
               <div className="relative">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-lg pointer-events-none">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none">
                   mail
                 </span>
                 <input
@@ -109,18 +116,21 @@ export default function LoginPage() {
                   placeholder="admin@shiftsync.com"
                   autoComplete="email"
                   required
-                  className="input-field pl-10"
+                  className="w-full h-11 pl-10 pr-4 bg-surface-container-low/60 border border-outline-variant/30 rounded-xl text-xs text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all shadow-xs"
                 />
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-xs font-semibold text-white/60 mb-1.5 uppercase tracking-wider">
+              <label
+                htmlFor="password"
+                className="block text-xs font-semibold text-on-surface-variant mb-1 font-label-md uppercase tracking-wider"
+              >
                 Password
               </label>
               <div className="relative">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-lg pointer-events-none">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none">
                   lock
                 </span>
                 <input
@@ -131,12 +141,12 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   autoComplete="current-password"
                   required
-                  className="input-field pl-10 pr-10"
+                  className="w-full h-11 pl-10 pr-10 bg-surface-container-low/60 border border-outline-variant/30 rounded-xl text-xs text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all shadow-xs"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors"
                 >
                   <span className="material-symbols-outlined text-lg">
                     {showPassword ? 'visibility_off' : 'visibility'}
@@ -149,16 +159,16 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="btn-primary w-full mt-2 h-11 cursor-pointer"
+              className="w-full h-11 rounded-xl bg-primary text-on-primary font-label-md text-xs font-semibold flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all hover:opacity-90 disabled:opacity-50 mt-2 cursor-pointer"
             >
               {isLoading ? (
                 <>
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className="material-symbols-outlined text-sm animate-spin">refresh</span>
                   Signing in…
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-lg">login</span>
+                  <span className="material-symbols-outlined text-base">login</span>
                   Sign In
                 </>
               )}
@@ -166,7 +176,7 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-white/20 text-xs mt-6">
+        <p className="text-center text-on-surface-variant/60 text-[11px] mt-6 font-label-mono">
           ShiftSync Workforce Management System
         </p>
       </div>

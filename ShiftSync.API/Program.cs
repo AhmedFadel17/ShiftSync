@@ -1,9 +1,12 @@
 
 using System;
+using System.Text;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.IdentityModel.Tokens;
 using ShiftSync.API.Data;
 using ShiftSync.API.Middlewares;
 using ShiftSync.API.Models.Entities;
@@ -12,17 +15,16 @@ using ShiftSync.API.Repositories.AttendanceBreaks;
 using ShiftSync.API.Repositories.Attendances;
 using ShiftSync.API.Repositories.BreakTypes;
 using ShiftSync.API.Repositories.Shifts;
+using ShiftSync.API.Repositories.Users;
 using ShiftSync.API.Repositories.UserShifts;
 using ShiftSync.API.Services.AttendanceBreaks;
 using ShiftSync.API.Services.Attendances;
 using ShiftSync.API.Services.Auth;
 using ShiftSync.API.Services.BreakTypes;
 using ShiftSync.API.Services.Shifts;
+using ShiftSync.API.Services.Users;
 using ShiftSync.API.Services.UserShifts;
 using ShiftSync.API.Validators.Shifts;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -98,6 +100,7 @@ builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<IBreakTypeService, BreakTypeService>();
 builder.Services.AddScoped<IUserShiftService, UserShiftService>();
 builder.Services.AddScoped<IShiftService, ShiftService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Generic Repository
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
@@ -106,6 +109,7 @@ builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 builder.Services.AddScoped<IBreakTypeRepository, BreakTypeRepository>();
 builder.Services.AddScoped<IUserShiftRepository, UserShiftRepository>();
 builder.Services.AddScoped<IShiftRepository, ShiftRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

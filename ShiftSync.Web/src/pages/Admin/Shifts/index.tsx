@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   useGetShiftsQuery,
   useCreateShiftMutation,
@@ -10,17 +11,6 @@ import { IsActiveBadge } from '@/components/ui/Badges/StatusBadge';
 import Pagination from '@/components/ui/Pagination';
 import Modal from '@/components/ui/Modals';
 import { toast } from 'sonner';
-import {
-  FaSearch,
-  FaPlus,
-  FaEdit,
-  FaTrash,
-  FaClock,
-  FaSpinner,
-  FaCheckCircle,
-  FaUsers,
-  FaCoffee,
-} from 'react-icons/fa';
 
 export default function ShiftsPage() {
   const [pageNumber, setPageNumber] = useState(1);
@@ -81,7 +71,6 @@ export default function ShiftsPage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Ensure HH:mm:ss format
       const formattedStartTime = createForm.startTime.length === 5 ? `${createForm.startTime}:00` : createForm.startTime;
       const formattedEndTime = createForm.endTime.length === 5 ? `${createForm.endTime}:00` : createForm.endTime;
 
@@ -142,29 +131,42 @@ export default function ShiftsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col w-full px-margin md:px-space-xl pb-space-xl space-y-space-lg max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <FaClock className="text-cyan-400" /> Shift Management
-          </h1>
-          <p className="text-white/40 text-sm mt-1">
-            Configure working shifts, time windows, break limits, and minimum employee coverage rules.
-          </p>
+      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-space-sm">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 shadow-sm mt-0.5">
+            <span className="material-symbols-outlined text-[22px]">calendar_today</span>
+          </div>
+          <div>
+            <span className="font-label-mono text-label-mono text-tertiary uppercase tracking-wider">
+              Scheduling Rules
+            </span>
+            <h1 className="font-headline-lg-mobile lg:text-headline-lg text-headline-lg-mobile text-on-surface tracking-tight font-bold">
+              Shift Management
+            </h1>
+            <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+              Configure working shifts, time windows, break limits, and minimum employee coverage rules.
+            </p>
+          </div>
         </div>
+
         <button
           onClick={() => setIsCreateOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-sm transition-colors shadow-lg shadow-cyan-900/30 self-start sm:self-auto"
+          className="h-10 px-4 rounded-xl bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98] transition-all hover:opacity-90 self-start sm:self-auto"
+          type="button"
         >
-          <FaPlus className="text-xs" /> New Shift
+          <span className="material-symbols-outlined text-[18px]">add</span>
+          <span>New Shift</span>
         </button>
-      </div>
+      </section>
 
       {/* Filter Bar */}
-      <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-4 backdrop-blur-md flex flex-wrap gap-4 items-center justify-between">
+      <section className="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-space-md shadow-sm flex flex-wrap gap-3 items-center justify-between">
         <div className="relative flex-1 min-w-[240px] max-w-md">
-          <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 text-sm" />
+          <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[18px]">
+            search
+          </span>
           <input
             type="text"
             placeholder="Search shifts by name..."
@@ -173,7 +175,7 @@ export default function ShiftsPage() {
               setSearchTerm(e.target.value);
               setPageNumber(1);
             }}
-            className="w-full pl-10 pr-4 py-2 bg-slate-950/60 border border-white/10 rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-cyan-500 transition-colors"
+            className="w-full h-10 pl-10 pr-4 bg-surface-container-low/60 text-on-surface rounded-xl shadow-xs placeholder:text-outline font-body-md text-xs border border-outline-variant/25 focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all"
           />
         </div>
 
@@ -184,80 +186,108 @@ export default function ShiftsPage() {
             setPageNumber(1);
           }}
           aria-label="Filter by shift active status"
-          className="bg-slate-950/60 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
+          className="h-10 bg-surface-container-low/60 border border-outline-variant/25 rounded-xl px-3 text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all cursor-pointer shadow-xs"
         >
           <option value="">All Shifts</option>
           <option value="true">Active Only</option>
           <option value="false">Inactive Only</option>
         </select>
-      </div>
+      </section>
 
       {/* Table */}
-      <div className="bg-slate-900/60 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-md">
+      <section className="bg-surface-container-lowest border border-outline-variant/20 rounded-xl shadow-sm overflow-hidden flex flex-col">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-white/80">
-            <thead className="bg-white/[0.03] text-xs uppercase tracking-wider text-white/40 border-b border-white/10 font-semibold">
+          <table className="w-full text-left text-xs text-on-surface">
+            <thead className="bg-surface-container-low/70 text-on-surface-variant font-label-mono text-[11px] uppercase tracking-wider border-b border-outline-variant/15 font-semibold">
               <tr>
-                <th className="px-6 py-4">Shift Name</th>
-                <th className="px-6 py-4">Hours (Start - End)</th>
-                <th className="px-6 py-4">Max Break Time</th>
-                <th className="px-6 py-4">Min Staff Coverage</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+                <th className="px-5 py-3.5">Shift Name</th>
+                <th className="px-5 py-3.5">Operating Window</th>
+                <th className="px-5 py-3.5">Max Break Allowed</th>
+                <th className="px-5 py-3.5">Min Coverage Required</th>
+                <th className="px-5 py-3.5">Status</th>
+                <th className="px-5 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-outline-variant/10">
               {isLoading || isFetching ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-white/40">
-                    <FaSpinner className="animate-spin text-2xl mx-auto text-cyan-400 mb-2" />
+                  <td colSpan={6} className="px-6 py-12 text-center text-on-surface-variant">
+                    <span className="material-symbols-outlined animate-spin text-2xl text-primary mb-2 block">
+                      refresh
+                    </span>
                     Loading shifts...
                   </td>
                 </tr>
               ) : shifts.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-white/40">
+                  <td colSpan={6} className="px-6 py-12 text-center text-on-surface-variant">
+                    <span className="material-symbols-outlined text-3xl text-outline mb-1 block">
+                      schedule
+                    </span>
                     No shifts found.
                   </td>
                 </tr>
               ) : (
                 shifts.map((shift) => (
-                  <tr key={shift.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="px-6 py-4 font-semibold text-white">
-                      {shift.name}
+                  <tr key={shift.id} className="hover:bg-surface-container-low/40 transition-colors">
+                    <td className="px-5 py-3.5 font-semibold text-on-surface">
+                      <Link
+                        to={`/admin/shifts/${shift.id}`}
+                        className="text-on-surface hover:text-primary transition-colors hover:underline flex items-center gap-1.5"
+                      >
+                        <span className="material-symbols-outlined text-[16px] text-tertiary">
+                          schedule
+                        </span>
+                        <span>{shift.name}</span>
+                      </Link>
                     </td>
-                    <td className="px-6 py-4 font-mono text-xs text-cyan-300">
-                      {shift.startTime} – {shift.endTime}
-                    </td>
-                    <td className="px-6 py-4 text-xs text-white/70">
-                      <span className="inline-flex items-center gap-1">
-                        <FaCoffee className="text-yellow-400/70" />
-                        {shift.maxAllowedBreaksDurationMinutes} min
+                    <td className="px-5 py-3.5">
+                      <span className="font-label-mono text-[11px] px-2 py-0.5 rounded-md bg-surface-container text-primary font-semibold">
+                        {shift.startTime} – {shift.endTime}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-xs text-white/70">
+                    <td className="px-5 py-3.5 text-on-surface-variant">
                       <span className="inline-flex items-center gap-1">
-                        <FaUsers className="text-cyan-400/70" />
-                        {shift.minActiveEmployeesRequired} active
+                        <span className="material-symbols-outlined text-[15px] text-tertiary">
+                          coffee
+                        </span>
+                        <span>{shift.maxAllowedBreaksDurationMinutes} min</span>
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-5 py-3.5 text-on-surface-variant">
+                      <span className="inline-flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[15px] text-secondary">
+                          groups
+                        </span>
+                        <span>{shift.minActiveEmployeesRequired} active</span>
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5">
                       <IsActiveBadge isActive={shift.isActive} />
                     </td>
-                    <td className="px-6 py-4 text-right space-x-2">
+                    <td className="px-5 py-3.5 text-right space-x-1.5">
+                      <Link
+                        to={`/admin/shifts/${shift.id}`}
+                        className="p-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors inline-flex items-center justify-center shadow-xs"
+                        title="View Shift Details & Staff"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">visibility</span>
+                      </Link>
                       <button
                         onClick={() => handleOpenEdit(shift)}
-                        className="p-2 rounded-lg bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-400 text-white/60 transition-colors"
+                        className="p-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors inline-flex items-center justify-center shadow-xs"
                         title="Edit Shift"
+                        type="button"
                       >
-                        <FaEdit className="text-xs" />
+                        <span className="material-symbols-outlined text-[16px]">edit</span>
                       </button>
                       <button
                         onClick={() => setDeletingShift(shift)}
-                        className="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 hover:text-red-400 text-white/60 transition-colors"
+                        className="p-1.5 rounded-lg bg-surface-container-low hover:bg-error-container text-on-surface-variant hover:text-error transition-colors inline-flex items-center justify-center shadow-xs"
                         title="Delete Shift"
+                        type="button"
                       >
-                        <FaTrash className="text-xs" />
+                        <span className="material-symbols-outlined text-[16px]">delete</span>
                       </button>
                     </td>
                   </tr>
@@ -269,7 +299,7 @@ export default function ShiftsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="p-4 border-t border-white/10 flex justify-center">
+          <div className="p-3.5 border-t border-outline-variant/15 flex justify-center bg-surface-container-lowest">
             <Pagination
               page={pageNumber}
               pageSize={pageSize}
@@ -286,7 +316,7 @@ export default function ShiftsPage() {
             />
           </div>
         )}
-      </div>
+      </section>
 
       {/* Create Shift Modal */}
       {isCreateOpen && (
@@ -298,7 +328,7 @@ export default function ShiftsPage() {
         >
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-white/60 uppercase mb-1">
+              <label className="block text-xs font-semibold text-on-surface-variant uppercase mb-1 font-label-md">
                 Shift Name
               </label>
               <input
@@ -307,13 +337,13 @@ export default function ShiftsPage() {
                 placeholder="e.g. Morning Shift A"
                 value={createForm.name}
                 onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950/60 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                className="w-full h-10 px-3.5 bg-surface-container-low/50 border border-outline-variant/30 rounded-xl text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all shadow-xs"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-white/60 uppercase mb-1">
+                <label className="block text-xs font-semibold text-on-surface-variant uppercase mb-1 font-label-md">
                   Start Time (HH:mm)
                 </label>
                 <input
@@ -322,11 +352,11 @@ export default function ShiftsPage() {
                   required
                   value={createForm.startTime}
                   onChange={(e) => setCreateForm({ ...createForm, startTime: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-950/60 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                  className="w-full h-10 px-3.5 bg-surface-container-low/50 border border-outline-variant/30 rounded-xl text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all shadow-xs"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-white/60 uppercase mb-1">
+                <label className="block text-xs font-semibold text-on-surface-variant uppercase mb-1 font-label-md">
                   End Time (HH:mm)
                 </label>
                 <input
@@ -335,14 +365,14 @@ export default function ShiftsPage() {
                   required
                   value={createForm.endTime}
                   onChange={(e) => setCreateForm({ ...createForm, endTime: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-950/60 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                  className="w-full h-10 px-3.5 bg-surface-container-low/50 border border-outline-variant/30 rounded-xl text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all shadow-xs"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-white/60 uppercase mb-1">
+                <label className="block text-xs font-semibold text-on-surface-variant uppercase mb-1 font-label-md">
                   Max Break (Minutes)
                 </label>
                 <input
@@ -356,12 +386,12 @@ export default function ShiftsPage() {
                       maxAllowedBreaksDurationMinutes: Number(e.target.value),
                     })
                   }
-                  className="w-full px-3.5 py-2.5 bg-slate-950/60 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                  className="w-full h-10 px-3.5 bg-surface-container-low/50 border border-outline-variant/30 rounded-xl text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all shadow-xs"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-white/60 uppercase mb-1">
-                  Min Active Staff
+                <label className="block text-xs font-semibold text-on-surface-variant uppercase mb-1 font-label-md">
+                  Min Staff Required
                 </label>
                 <input
                   type="number"
@@ -374,25 +404,29 @@ export default function ShiftsPage() {
                       minActiveEmployeesRequired: Number(e.target.value),
                     })
                   }
-                  className="w-full px-3.5 py-2.5 bg-slate-950/60 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                  className="w-full h-10 px-3.5 bg-surface-container-low/50 border border-outline-variant/30 rounded-xl text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all shadow-xs"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-surface-container">
               <button
                 type="button"
                 onClick={() => setIsCreateOpen(false)}
-                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 text-sm font-medium transition-colors"
+                className="px-4 py-2 rounded-xl bg-surface-container text-on-surface-variant text-xs font-semibold hover:bg-surface-container-high transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isCreating}
-                className="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+                className="px-5 py-2 rounded-xl bg-primary text-on-primary text-xs font-semibold hover:opacity-90 transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
               >
-                {isCreating ? <FaSpinner className="animate-spin text-xs" /> : <FaCheckCircle className="text-xs" />}
+                {isCreating ? (
+                  <span className="material-symbols-outlined text-sm animate-spin">refresh</span>
+                ) : (
+                  <span className="material-symbols-outlined text-sm">add</span>
+                )}
                 Create Shift
               </button>
             </div>
@@ -410,7 +444,7 @@ export default function ShiftsPage() {
         >
           <form onSubmit={handleUpdate} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-white/60 uppercase mb-1">
+              <label className="block text-xs font-semibold text-on-surface-variant uppercase mb-1 font-label-md">
                 Shift Name
               </label>
               <input
@@ -418,14 +452,14 @@ export default function ShiftsPage() {
                 required
                 value={editForm.name}
                 onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950/60 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                className="w-full h-10 px-3.5 bg-surface-container-low/50 border border-outline-variant/30 rounded-xl text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all shadow-xs"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-white/60 uppercase mb-1">
-                  Start Time (HH:mm)
+                <label className="block text-xs font-semibold text-on-surface-variant uppercase mb-1 font-label-md">
+                  Start Time
                 </label>
                 <input
                   type="time"
@@ -433,12 +467,12 @@ export default function ShiftsPage() {
                   required
                   value={editForm.startTime}
                   onChange={(e) => setEditForm({ ...editForm, startTime: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-950/60 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                  className="w-full h-10 px-3.5 bg-surface-container-low/50 border border-outline-variant/30 rounded-xl text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all shadow-xs"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-white/60 uppercase mb-1">
-                  End Time (HH:mm)
+                <label className="block text-xs font-semibold text-on-surface-variant uppercase mb-1 font-label-md">
+                  End Time
                 </label>
                 <input
                   type="time"
@@ -446,14 +480,14 @@ export default function ShiftsPage() {
                   required
                   value={editForm.endTime}
                   onChange={(e) => setEditForm({ ...editForm, endTime: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-950/60 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                  className="w-full h-10 px-3.5 bg-surface-container-low/50 border border-outline-variant/30 rounded-xl text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all shadow-xs"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-white/60 uppercase mb-1">
+                <label className="block text-xs font-semibold text-on-surface-variant uppercase mb-1 font-label-md">
                   Max Break (Minutes)
                 </label>
                 <input
@@ -467,12 +501,12 @@ export default function ShiftsPage() {
                       maxAllowedBreaksDurationMinutes: Number(e.target.value),
                     })
                   }
-                  className="w-full px-3.5 py-2.5 bg-slate-950/60 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                  className="w-full h-10 px-3.5 bg-surface-container-low/50 border border-outline-variant/30 rounded-xl text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all shadow-xs"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-white/60 uppercase mb-1">
-                  Min Active Staff
+                <label className="block text-xs font-semibold text-on-surface-variant uppercase mb-1 font-label-md">
+                  Min Staff Required
                 </label>
                 <input
                   type="number"
@@ -485,25 +519,29 @@ export default function ShiftsPage() {
                       minActiveEmployeesRequired: Number(e.target.value),
                     })
                   }
-                  className="w-full px-3.5 py-2.5 bg-slate-950/60 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                  className="w-full h-10 px-3.5 bg-surface-container-low/50 border border-outline-variant/30 rounded-xl text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-primary/50 transition-all shadow-xs"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-surface-container">
               <button
                 type="button"
                 onClick={() => setEditingShift(null)}
-                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 text-sm font-medium transition-colors"
+                className="px-4 py-2 rounded-xl bg-surface-container text-on-surface-variant text-xs font-semibold hover:bg-surface-container-high transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isUpdating}
-                className="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+                className="px-5 py-2 rounded-xl bg-primary text-on-primary text-xs font-semibold hover:opacity-90 transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
               >
-                {isUpdating ? <FaSpinner className="animate-spin text-xs" /> : <FaCheckCircle className="text-xs" />}
+                {isUpdating ? (
+                  <span className="material-symbols-outlined text-sm animate-spin">refresh</span>
+                ) : (
+                  <span className="material-symbols-outlined text-sm">check</span>
+                )}
                 Save Changes
               </button>
             </div>
@@ -511,23 +549,23 @@ export default function ShiftsPage() {
         </Modal>
       )}
 
-      {/* Delete Shift Modal */}
+      {/* Delete Confirmation Modal */}
       {deletingShift && (
         <Modal
           isOpen={true}
           onClose={() => setDeletingShift(null)}
-          title="Delete Shift"
+          title="Confirm Delete Shift"
           size="sm"
         >
           <div className="space-y-4">
-            <p className="text-sm text-white/70">
-              Are you sure you want to delete shift <span className="font-semibold text-white">{deletingShift.name}</span>?
+            <p className="text-xs text-on-surface-variant leading-relaxed">
+              Are you sure you want to delete shift <span className="font-semibold text-on-surface">{deletingShift.name}</span>?
             </p>
-            <div className="flex items-center justify-end gap-3 pt-2">
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-surface-container">
               <button
                 type="button"
                 onClick={() => setDeletingShift(null)}
-                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 text-sm font-medium transition-colors"
+                className="px-4 py-2 rounded-xl bg-surface-container text-on-surface-variant text-xs font-semibold hover:bg-surface-container-high transition-colors"
               >
                 Cancel
               </button>
@@ -535,9 +573,13 @@ export default function ShiftsPage() {
                 type="button"
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-error text-on-error text-xs font-semibold hover:opacity-90 transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
               >
-                {isDeleting ? <FaSpinner className="animate-spin text-xs" /> : <FaTrash className="text-xs" />}
+                {isDeleting ? (
+                  <span className="material-symbols-outlined text-sm animate-spin">refresh</span>
+                ) : (
+                  <span className="material-symbols-outlined text-sm">delete</span>
+                )}
                 Delete Shift
               </button>
             </div>

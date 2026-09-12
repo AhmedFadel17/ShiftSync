@@ -70,34 +70,34 @@ export default function Modal({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
             {/* Backdrop / Overlay */}
             <div
-                className="fixed inset-0 bg-black/75 backdrop-blur-md transition-opacity duration-300 animate-fadeIn"
+                className="fixed inset-0 bg-on-background/40 backdrop-blur-sm transition-opacity duration-300 animate-fadeIn"
                 onClick={closeOnOverlayClick ? onClose : undefined}
                 aria-hidden="true"
             />
 
             {/* Modal Container */}
             <div
-                className={`relative w-full ${sizeClasses[size]} glass-card bg-slate-900/90 border border-white/10 rounded-2xl shadow-2xl flex flex-col z-10 overflow-hidden transition-all duration-300 transform animate-scaleUp ${className}`}
+                className={`relative w-full ${sizeClasses[size]} bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-2xl flex flex-col z-10 overflow-hidden transition-all duration-300 transform animate-scaleUp ${className}`}
                 role="dialog"
                 aria-modal="true"
             >
                 {/* Modal Header */}
                 {(title || showCloseButton) && (
-                    <div className="flex items-start justify-between p-5 sm:p-6 border-b border-white/10">
+                    <div className="flex items-start justify-between p-5 sm:p-6 border-b border-surface-container">
                         <div className="pr-4">
                             {typeof title === "string" ? (
-                                <h3 className="text-lg font-bold text-white tracking-wide">{title}</h3>
+                                <h3 className="text-base sm:text-lg font-bold text-on-surface tracking-tight font-headline-md">{title}</h3>
                             ) : (
                                 title
                             )}
-                            {subtitle && <p className="text-xs text-white/50 mt-1">{subtitle}</p>}
+                            {subtitle && <p className="text-xs text-on-surface-variant mt-1 font-body-sm">{subtitle}</p>}
                         </div>
 
                         {showCloseButton && (
                             <button
                                 onClick={onClose}
                                 type="button"
-                                className="text-white/40 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl p-2 transition-colors focus:outline-none"
+                                className="text-outline hover:text-on-surface hover:bg-surface-container rounded-xl p-1.5 transition-colors focus:outline-none"
                                 aria-label="Close modal"
                             >
                                 <span className="material-symbols-outlined text-lg leading-none block">
@@ -109,13 +109,13 @@ export default function Modal({
                 )}
 
                 {/* Modal Body */}
-                <div className="p-5 sm:p-6 flex-1 overflow-y-auto custom-scrollbar text-white/80 text-sm">
+                <div className="p-5 sm:p-6 flex-1 overflow-y-auto custom-scrollbar text-on-surface text-sm">
                     {children}
                 </div>
 
                 {/* Modal Footer */}
                 {footer && (
-                    <div className="p-4 sm:p-5 border-t border-white/10 bg-white/[0.02] flex items-center justify-end gap-3">
+                    <div className="p-4 sm:p-5 border-t border-surface-container bg-surface-container-low/60 flex items-center justify-end gap-3">
                         {footer}
                     </div>
                 )}
