@@ -76,20 +76,4 @@ class ShiftModel {
     'minActiveEmployeesRequired': minActiveEmployeesRequired,
     'isActive': isActive,
   };
-
-  // Mock shifts for demo
-  static List<ShiftModel> get mockList => [
-    const ShiftModel(
-      id: 1, name: 'Morning Care', startTime: '08:00:00', endTime: '16:00:00',
-      maxAllowedBreaksDurationMinutes: 45, minActiveEmployeesRequired: 4, isActive: true,
-    ),
-    const ShiftModel(
-      id: 2, name: 'Evening Round', startTime: '16:00:00', endTime: '00:00:00',
-      maxAllowedBreaksDurationMinutes: 45, minActiveEmployeesRequired: 3, isActive: true,
-    ),
-    const ShiftModel(
-      id: 3, name: 'Night Watch', startTime: '00:00:00', endTime: '08:00:00',
-      maxAllowedBreaksDurationMinutes: 60, minActiveEmployeesRequired: 2, isActive: true,
-    ),
-  ];
 }

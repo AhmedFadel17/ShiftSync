@@ -6,21 +6,25 @@ using ShiftSync.API.Models.Entities;
 using ShiftSync.API.Models.Enums;
 using ShiftSync.API.Repositories.AttendanceBreaks;
 using ShiftSync.API.Repositories.Attendances;
+using ShiftSync.API.Repositories.BreakTypes;
 
 namespace ShiftSync.API.Services.AttendanceBreaks;
 
 public class AttendanceBreakService : IAttendanceBreakService
 {
     private readonly IAttendanceBreakRepository _breakRepository;
+    private readonly IBreakTypeRepository _breakTypeRepository;
     private readonly IAttendanceRepository _attendanceRepository;
     private readonly IMapper _mapper;
 
     public AttendanceBreakService(
         IAttendanceBreakRepository breakRepository,
+        IBreakTypeRepository breakTypeRepository,
         IAttendanceRepository attendanceRepository,
         IMapper mapper)
     {
         _breakRepository = breakRepository;
+        _breakTypeRepository = breakTypeRepository;
         _attendanceRepository = attendanceRepository;
         _mapper = mapper;
     }
@@ -47,7 +51,6 @@ public class AttendanceBreakService : IAttendanceBreakService
         // Load attendance with its shift and break type info
         var attendance = await _attendanceRepository.Query()
             .Include(a => a.UserShift).ThenInclude(us => us.Shift)
-            .Include(a => a.Breaks).ThenInclude(b => b.BreakType)
             .FirstOrDefaultAsync(a => a.Id == dto.AttendanceId, cancellationToken)
             ?? throw new KeyNotFoundException($"Attendance record with id {dto.AttendanceId} was not found.");
 
@@ -57,15 +60,8 @@ public class AttendanceBreakService : IAttendanceBreakService
         if (attendance.CheckOutTime.HasValue)
             throw new ArgumentException("Cannot request a break after checking out.");
 
-        // Load the break type
-        var breakType = attendance.Breaks
-            .Select(b => b.BreakType)
-            .FirstOrDefault(bt => bt.Id == dto.BreakTypeId)
-            ?? await _breakRepository.Query()
-                .Include(ab => ab.BreakType)
-                .Where(ab => ab.BreakTypeId == dto.BreakTypeId)
-                .Select(ab => ab.BreakType)
-                .FirstOrDefaultAsync(cancellationToken)
+        // 🟢 التصحيح: جلب الـ BreakType مباشرة من جدول BreakType الرئيسي
+        var breakType = await _breakTypeRepository.Query().FirstOrDefaultAsync(bt => bt.Id == dto.BreakTypeId, cancellationToken)
             ?? throw new KeyNotFoundException($"Break type with id {dto.BreakTypeId} was not found.");
 
         // Enforce MaxOccurrencesPerShift
@@ -81,8 +77,7 @@ public class AttendanceBreakService : IAttendanceBreakService
         // Enforce MinActiveEmployeesRequired — check how many are currently on break
         var activeBreaks = await _breakRepository.CountActiveBreaksForShiftAsync(attendance.UserShiftId, cancellationToken);
         var shift = attendance.UserShift.Shift;
-        // Count all employees on this shift today to determine active headcount
-        // (active = not on break): If approving would push too many onto break, queue it
+
         var initialStatus = activeBreaks >= (shift.MinActiveEmployeesRequired - 1)
             ? BreakStatus.WaitingQueue
             : BreakStatus.Approved;

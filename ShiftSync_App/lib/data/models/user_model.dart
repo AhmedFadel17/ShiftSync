@@ -49,15 +49,4 @@ class UserModel {
     'isActive': isActive,
     'createdAt': createdAt.toIso8601String(),
   };
-
-  // Mock for demo
-  static UserModel get mock => UserModel(
-    id: 'emp-001',
-    fullName: 'Alex Rivera',
-    email: 'alex.rivera@shiftsync.io',
-    userName: 'alex.rivera',
-    role: UserRole.user,
-    isActive: true,
-    createdAt: DateTime(2024, 1, 15),
-  );
 }

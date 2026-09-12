@@ -1,6 +1,7 @@
 // lib/providers/shift_provider.dart
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:shiftsync_app/core/errors/api_exception.dart';
 import 'package:shiftsync_app/data/models/attendance_model.dart';
 import 'package:shiftsync_app/data/models/break_model.dart';
 import 'package:shiftsync_app/data/models/notification_model.dart';
@@ -32,6 +33,65 @@ class ShiftProvider extends ChangeNotifier {
   List<UserShiftModel> get upcomingShifts =>
       _userShifts.where((s) => s.isFuture || s.isToday).toList()
         ..sort((a, b) => a.date.compareTo(b.date));
+
+  UserShiftModel? get nextUpcomingShift {
+    final now = DateTime.now();
+    final candidates = _userShifts.where((s) {
+      if (s.shift == null) {
+        return s.date.isAfter(DateTime(now.year, now.month, now.day));
+      }
+      final parts = s.shift!.startTime.split(':');
+      final sHour = int.tryParse(parts[0]) ?? 0;
+      final sMinute = int.tryParse(parts.length > 1 ? parts[1] : '0') ?? 0;
+      final startDt = DateTime(s.date.year, s.date.month, s.date.day, sHour, sMinute);
+      return startDt.isAfter(now);
+    }).toList()
+      ..sort((a, b) {
+        final aParts = a.shift?.startTime.split(':') ?? ['0', '0'];
+        final bParts = b.shift?.startTime.split(':') ?? ['0', '0'];
+        final aDt = DateTime(a.date.year, a.date.month, a.date.day, int.tryParse(aParts[0]) ?? 0, int.tryParse(aParts.length > 1 ? aParts[1] : '0') ?? 0);
+        final bDt = DateTime(b.date.year, b.date.month, b.date.day, int.tryParse(bParts[0]) ?? 0, int.tryParse(bParts.length > 1 ? bParts[1] : '0') ?? 0);
+        return aDt.compareTo(bDt);
+      });
+
+    return candidates.isNotEmpty ? candidates.first : (todayShift ?? (upcomingShifts.isNotEmpty ? upcomingShifts.first : null));
+  }
+
+  Duration? get timeUntilNextShift {
+    final next = nextUpcomingShift;
+    if (next == null || next.shift == null) return null;
+    final now = DateTime.now();
+    final parts = next.shift!.startTime.split(':');
+    final sHour = int.tryParse(parts[0]) ?? 0;
+    final sMinute = int.tryParse(parts.length > 1 ? parts[1] : '0') ?? 0;
+    final startDt = DateTime(next.date.year, next.date.month, next.date.day, sHour, sMinute);
+    if (startDt.isBefore(now)) return Duration.zero;
+    return startDt.difference(now);
+  }
+
+  String get nextShiftCountdownDisplay {
+    final d = timeUntilNextShift;
+    if (d == null) return '--:--:--';
+    final hours = d.inHours.toString().padLeft(2, '0');
+    final minutes = (d.inMinutes % 60).toString().padLeft(2, '0');
+    final seconds = (d.inSeconds % 60).toString().padLeft(2, '0');
+    return '$hours:$minutes:$seconds';
+  }
+
+  String get nextShiftCountdownVerbose {
+    final d = timeUntilNextShift;
+    if (d == null) return 'No shifts scheduled';
+    final h = d.inHours;
+    final m = d.inMinutes % 60;
+    final s = d.inSeconds % 60;
+    if (h > 0) {
+      return '${h}h ${m}m ${s}s';
+    } else if (m > 0) {
+      return '${m}m ${s}s';
+    } else {
+      return '${s}s';
+    }
+  }
 
   // ── Attendance (Clock-In) State ──────────────────────────────────────────────
   AttendanceModel? _activeAttendance;
@@ -118,9 +178,9 @@ class ShiftProvider extends ChangeNotifier {
   }
 
   void _loadInitialData() {
-    _userShifts = UserShiftModel.mockList;
-    _attendanceHistory = AttendanceModel.mockHistory;
-    _notifications = NotificationModel.mockList;
+    _userShifts = [];
+    _attendanceHistory = [];
+    _notifications = [];
     _breakTypes = BreakTypeModel.defaultTypes;
     notifyListeners();
   }
@@ -130,18 +190,21 @@ class ShiftProvider extends ChangeNotifier {
 
     _isShiftsLoading = true;
     _isHistoryLoading = true;
+    _shiftsError = null;
     notifyListeners();
 
     try {
       // 1. Fetch user shifts
-      final shifts = await _apiService.getUserShifts(_userId!);
-      if (shifts.isNotEmpty) {
+      try {
+        final shifts = await _apiService.getUserShifts(_userId!);
         _userShifts = shifts;
+      } catch (e) {
+        _shiftsError = e.toString();
       }
 
       // 2. Fetch attendance history and check for active clock-in
-      final attendances = await _apiService.getAttendances(_userId!);
-      if (attendances.isNotEmpty) {
+      try {
+        final attendances = await _apiService.getAttendances(_userId!);
         _attendanceHistory = attendances;
         final ongoing = attendances.where((a) => a.checkOutTime == null).toList();
         if (ongoing.isNotEmpty) {
@@ -149,15 +212,20 @@ class ShiftProvider extends ChangeNotifier {
           _isClockedIn = true;
           _elapsedTime = DateTime.now().difference(_activeAttendance!.checkInTime);
           await _refreshActiveBreaks();
+        } else {
+          _activeAttendance = null;
+          _isClockedIn = false;
+          _elapsedTime = Duration.zero;
         }
-      }
+      } catch (_) {}
 
       // 3. Fetch break types
-      final types = await _apiService.getBreakTypes();
-      if (types.isNotEmpty) {
-        _breakTypes = types;
-      }
-    } catch (_) {
+      try {
+        final types = await _apiService.getBreakTypes();
+        if (types.isNotEmpty) {
+          _breakTypes = types;
+        }
+      } catch (_) {}
     } finally {
       _isShiftsLoading = false;
       _isHistoryLoading = false;
@@ -187,39 +255,27 @@ class ShiftProvider extends ChangeNotifier {
   Future<bool> clockIn({double? lat, double? lng}) async {
     if (_isClockedIn) return true;
 
-    final userShiftId = todayShift?.id ?? 0;
+    final currentShift = todayShift;
+    if (currentShift == null || currentShift.id <= 0) {
+      throw const ApiException('No scheduled shift found for today to check in to.');
+    }
+
     final liveLat = lat ?? 30.0444;
     final liveLng = lng ?? 31.2357;
 
-    if (_userId != null && _userId!.isNotEmpty && userShiftId > 0) {
-      final result = await _apiService.checkIn(
-        userShiftId: userShiftId,
-        latitude: liveLat,
-        longitude: liveLng,
-      );
-      if (result != null) {
-        _activeAttendance = result;
-      }
-    }
+    final result = await _apiService.checkIn(
+      userShiftId: currentShift.id,
+      latitude: liveLat,
+      longitude: liveLng,
+    );
 
-    if (_activeAttendance == null) {
-      _activeAttendance = AttendanceModel(
-        id: DateTime.now().millisecondsSinceEpoch,
-        userId: _userId ?? 'emp-001',
-        userShiftId: userShiftId,
-        checkInTime: DateTime.now(),
-        checkInLatitude: liveLat,
-        checkInLongitude: liveLng,
-        shiftName: todayShift?.shift?.name ?? 'Emergency Care Shift',
-      );
-    }
-
+    _activeAttendance = result;
     _isClockedIn = true;
     _elapsedTime = Duration.zero;
 
     addNotification(
       title: 'Shift Started',
-      body: 'You successfully clocked in at ${AttendanceModel(id: 0, userId: '', userShiftId: 0, checkInTime: DateTime.now()).formattedCheckIn}.',
+      body: 'You successfully clocked in at ${_activeAttendance!.formattedCheckIn}.',
       type: NotificationType.general,
     );
 
@@ -237,15 +293,16 @@ class ShiftProvider extends ChangeNotifier {
     final liveLat = lat ?? 30.0444;
     final liveLng = lng ?? 31.2357;
 
-    if (_userId != null && _userId!.isNotEmpty && _activeAttendance!.id > 0) {
-      await _apiService.checkOut(
+    AttendanceModel? completedAttendance;
+    if (_activeAttendance!.id > 0) {
+      completedAttendance = await _apiService.checkOut(
         attendanceId: _activeAttendance!.id,
         latitude: liveLat,
         longitude: liveLng,
       );
     }
 
-    final completed = AttendanceModel(
+    final completed = completedAttendance ?? AttendanceModel(
       id: _activeAttendance!.id,
       userId: _activeAttendance!.userId,
       userShiftId: _activeAttendance!.userShiftId,
@@ -277,34 +334,18 @@ class ShiftProvider extends ChangeNotifier {
 
   // ── Break Actions ─────────────────────────────────────────────────────────────
   Future<bool> takeBreak(BreakTypeModel breakType, {String? note}) async {
-    if (!_isClockedIn || _activeAttendance == null) return false;
-
-    if (_userId != null && _userId!.isNotEmpty && _activeAttendance!.id > 0) {
-      final res = await _apiService.requestBreak(
-        attendanceId: _activeAttendance!.id,
-        breakTypeId: breakType.id,
-        note: note,
-      );
-      if (res != null) {
-        _activeBreak = res;
-        _activeAttendanceBreaks.add(res);
-      }
+    if (!_isClockedIn || _activeAttendance == null) {
+      throw const ApiException('You must be clocked in to take a break.');
     }
 
-    if (_activeBreak == null) {
-      _activeBreak = AttendanceBreakModel(
-        id: DateTime.now().millisecondsSinceEpoch,
-        attendanceId: _activeAttendance!.id,
-        breakTypeId: breakType.id,
-        breakTypeName: breakType.name,
-        requestTime: DateTime.now(),
-        startTime: DateTime.now(),
-        status: BreakStatusEnum.approved,
-        note: note,
-      );
-      _activeAttendanceBreaks.add(_activeBreak!);
-    }
+    final res = await _apiService.requestBreak(
+      attendanceId: _activeAttendance!.id,
+      breakTypeId: breakType.id,
+      note: note,
+    );
 
+    _activeBreak = res;
+    _activeAttendanceBreaks.add(res);
     _breakElapsedTime = Duration.zero;
 
     addNotification(
@@ -322,12 +363,13 @@ class ShiftProvider extends ChangeNotifier {
     if (_activeBreak == null) return true;
 
     final breakId = _activeBreak!.id;
-    if (_userId != null && _userId!.isNotEmpty && breakId > 0) {
-      await _apiService.endBreak(breakId);
+    AttendanceBreakModel? res;
+    if (breakId > 0) {
+      res = await _apiService.endBreak(breakId);
     }
 
     final durationMin = (_breakElapsedTime.inMinutes > 0) ? _breakElapsedTime.inMinutes.toDouble() : 1.0;
-    final completedBreak = AttendanceBreakModel(
+    final completedBreak = res ?? AttendanceBreakModel(
       id: _activeBreak!.id,
       attendanceId: _activeBreak!.attendanceId,
       breakTypeId: _activeBreak!.breakTypeId,
@@ -378,23 +420,16 @@ class ShiftProvider extends ChangeNotifier {
   void _startPeriodicTicker() {
     _tickerTimer?.cancel();
     _tickerTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      bool changed = false;
-
       if (_isClockedIn && _activeAttendance != null) {
         _elapsedTime = DateTime.now().difference(_activeAttendance!.checkInTime);
-        changed = true;
       }
 
       if (isOnBreak && _activeBreak?.startTime != null) {
         _breakElapsedTime = DateTime.now().difference(_activeBreak!.startTime!);
-        changed = true;
       }
 
       _checkSmartAlerts();
-
-      if (changed) {
-        notifyListeners();
-      }
+      notifyListeners();
     });
   }
 

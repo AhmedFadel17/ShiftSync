@@ -43,41 +43,4 @@ class UserShiftModel {
       shift: json['shift'] != null ? ShiftModel.fromJson(json['shift'] as Map<String, dynamic>) : null,
     );
   }
-
-  // Mock user-shifts for demo
-  static List<UserShiftModel> get mockList {
-    final now = DateTime.now();
-    return [
-      UserShiftModel(
-        id: 1, userId: 'emp-001', shiftId: 1,
-        date: now,
-        shift: ShiftModel.mockList[0],
-        status: UserShiftStatus.confirmed,
-      ),
-      UserShiftModel(
-        id: 2, userId: 'emp-001', shiftId: 1,
-        date: now.add(const Duration(days: 1)),
-        shift: ShiftModel.mockList[0],
-        status: UserShiftStatus.scheduled,
-      ),
-      UserShiftModel(
-        id: 3, userId: 'emp-001', shiftId: 2,
-        date: now.add(const Duration(days: 3)),
-        shift: ShiftModel.mockList[1],
-        status: UserShiftStatus.scheduled,
-      ),
-      UserShiftModel(
-        id: 4, userId: 'emp-001', shiftId: 1,
-        date: now.add(const Duration(days: 5)),
-        shift: ShiftModel.mockList[0],
-        status: UserShiftStatus.pendingSwap,
-      ),
-      UserShiftModel(
-        id: 5, userId: 'emp-001', shiftId: 3,
-        date: now.add(const Duration(days: 7)),
-        shift: ShiftModel.mockList[2],
-        status: UserShiftStatus.scheduled,
-      ),
-    ];
-  }
 }

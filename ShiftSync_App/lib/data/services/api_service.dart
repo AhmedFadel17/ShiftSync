@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shiftsync_app/core/constants/api_constants.dart';
+import 'package:shiftsync_app/core/errors/api_exception.dart';
 import 'package:shiftsync_app/data/models/attendance_model.dart';
 import 'package:shiftsync_app/data/models/break_model.dart';
 import 'package:shiftsync_app/data/models/user_shift_model.dart';
@@ -15,6 +16,52 @@ class ApiService {
     if (token != null && token!.isNotEmpty) 'Authorization': 'Bearer $token',
   };
 
+  ApiException _parseError(http.Response res) {
+    try {
+      final decoded = jsonDecode(res.body);
+      if (decoded is Map<String, dynamic>) {
+        String? message = decoded['message'] as String?;
+        final errors = decoded['errors'];
+        if (errors is Map<String, dynamic>) {
+          final errList = <String>[];
+          errors.forEach((key, val) {
+            if (val is List) {
+              errList.addAll(val.map((e) => e.toString()));
+            } else if (val != null) {
+              errList.add(val.toString());
+            }
+          });
+          if (errList.isNotEmpty) {
+            message = (message != null && message.isNotEmpty)
+                ? '$message: ${errList.join(', ')}'
+                : errList.join(', ');
+          }
+        }
+        if (message != null && message.isNotEmpty) {
+          return ApiException(message, statusCode: res.statusCode);
+        }
+      }
+    } catch (_) {}
+
+    if (res.statusCode == 401) {
+      return const ApiException('Session expired. Please log in again.', statusCode: 401);
+    }
+    if (res.statusCode == 403) {
+      return const ApiException('You do not have permission to perform this action.', statusCode: 403);
+    }
+    if (res.statusCode == 404) {
+      return const ApiException('The requested resource was not found.', statusCode: 404);
+    }
+    if (res.statusCode >= 500) {
+      return const ApiException('Server error. Please try again later.', statusCode: 500);
+    }
+
+    return ApiException(
+      'Request failed with status ${res.statusCode}',
+      statusCode: res.statusCode,
+    );
+  }
+
   // ── Shifts & Schedule ───────────────────────────────────────────────────────
   Future<List<UserShiftModel>> getUserShifts(String userId) async {
     try {
@@ -26,8 +73,12 @@ class ApiService {
         final items = (data is Map && data.containsKey('items')) ? data['items'] as List : (data as List);
         return items.map((e) => UserShiftModel.fromJson(e as Map<String, dynamic>)).toList();
       }
-    } catch (_) {}
-    return [];
+      throw _parseError(res);
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException('Failed to load schedule: $e');
+    }
   }
 
   // ── Attendances ────────────────────────────────────────────────────────────
@@ -41,11 +92,15 @@ class ApiService {
         final items = (data is Map && data.containsKey('items')) ? data['items'] as List : (data as List);
         return items.map((e) => AttendanceModel.fromJson(e as Map<String, dynamic>)).toList();
       }
-    } catch (_) {}
-    return [];
+      throw _parseError(res);
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException('Failed to load attendance history: $e');
+    }
   }
 
-  Future<AttendanceModel?> checkIn({
+  Future<AttendanceModel> checkIn({
     required int userShiftId,
     required double latitude,
     required double longitude,
@@ -69,11 +124,15 @@ class ApiService {
         final data = decoded['data'] as Map<String, dynamic>? ?? decoded;
         return AttendanceModel.fromJson(data);
       }
-    } catch (_) {}
-    return null;
+      throw _parseError(res);
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException('Check-in connection error: $e');
+    }
   }
 
-  Future<AttendanceModel?> checkOut({
+  Future<AttendanceModel> checkOut({
     required int attendanceId,
     required double latitude,
     required double longitude,
@@ -96,8 +155,12 @@ class ApiService {
         final data = decoded['data'] as Map<String, dynamic>? ?? decoded;
         return AttendanceModel.fromJson(data);
       }
-    } catch (_) {}
-    return null;
+      throw _parseError(res);
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException('Check-out connection error: $e');
+    }
   }
 
   // ── Break Types ────────────────────────────────────────────────────────────
@@ -126,11 +189,15 @@ class ApiService {
         final items = (data is Map && data.containsKey('items')) ? data['items'] as List : (data as List);
         return items.map((e) => AttendanceBreakModel.fromJson(e as Map<String, dynamic>)).toList();
       }
-    } catch (_) {}
-    return [];
+      throw _parseError(res);
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException('Failed to load breaks: $e');
+    }
   }
 
-  Future<AttendanceBreakModel?> requestBreak({
+  Future<AttendanceBreakModel> requestBreak({
     required int attendanceId,
     required int breakTypeId,
     String? note,
@@ -154,11 +221,15 @@ class ApiService {
         final data = decoded['data'] as Map<String, dynamic>? ?? decoded;
         return AttendanceBreakModel.fromJson(data);
       }
-    } catch (_) {}
-    return null;
+      throw _parseError(res);
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException('Break request connection error: $e');
+    }
   }
 
-  Future<AttendanceBreakModel?> endBreak(int breakId) async {
+  Future<AttendanceBreakModel> endBreak(int breakId) async {
     try {
       final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.attendanceBreaks}/$breakId/end');
       final res = await http.post(uri, headers: _headers).timeout(const Duration(seconds: 12));
@@ -167,7 +238,11 @@ class ApiService {
         final data = decoded['data'] as Map<String, dynamic>? ?? decoded;
         return AttendanceBreakModel.fromJson(data);
       }
-    } catch (_) {}
-    return null;
+      throw _parseError(res);
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException('End break connection error: $e');
+    }
   }
 }

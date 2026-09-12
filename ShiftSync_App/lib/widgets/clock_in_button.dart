@@ -5,12 +5,14 @@ import 'package:shiftsync_app/core/theme/app_theme.dart';
 
 class ClockInButton extends StatefulWidget {
   final bool isClockedIn;
+  final bool isLoading;
   final VoidCallback onClockIn;
   final VoidCallback onClockOut;
 
   const ClockInButton({
     super.key,
     required this.isClockedIn,
+    this.isLoading = false,
     required this.onClockIn,
     required this.onClockOut,
   });
@@ -43,6 +45,7 @@ class _ClockInButtonState extends State<ClockInButton>
   }
 
   void _onPressed() {
+    if (widget.isLoading) return;
     HapticFeedback.mediumImpact();
     if (widget.isClockedIn) {
       widget.onClockOut();
@@ -54,12 +57,12 @@ class _ClockInButtonState extends State<ClockInButton>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: _onPressed,
+      onTap: widget.isLoading ? null : _onPressed,
       child: AnimatedBuilder(
         animation: _pulseAnimation,
         builder: (context, child) {
           return Transform.scale(
-            scale: widget.isClockedIn ? _pulseAnimation.value : 1.0,
+            scale: (widget.isClockedIn && !widget.isLoading) ? _pulseAnimation.value : 1.0,
             child: child,
           );
         },
@@ -78,57 +81,68 @@ class _ClockInButtonState extends State<ClockInButton>
             boxShadow: [
               BoxShadow(
                 color: (widget.isClockedIn ? AppColors.secondary : AppColors.primary)
-                    .withOpacity(0.35),
+                    .withValues(alpha: 0.35),
                 blurRadius: 20,
                 spreadRadius: 0,
                 offset: const Offset(0, 6),
               ),
             ],
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  widget.isClockedIn
-                      ? Icons.logout_rounded
-                      : Icons.login_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.isClockedIn ? 'Clock Out' : 'Clock In',
-                    style: const TextStyle(
+          child: widget.isLoading
+              ? const Center(
+                  child: SizedBox(
+                    width: 26,
+                    height: 26,
+                    child: CircularProgressIndicator(
                       color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.3,
+                      strokeWidth: 2.5,
                     ),
                   ),
-                  Text(
-                    widget.isClockedIn ? 'Tap to end your shift' : 'Tap to start your shift',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        widget.isClockedIn
+                            ? Icons.logout_rounded
+                            : Icons.login_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                    const SizedBox(width: 14),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.isClockedIn ? 'Clock Out' : 'Clock In',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        Text(
+                          widget.isClockedIn ? 'Tap to end your shift' : 'Tap to start your shift',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
         ),
       ),
     );

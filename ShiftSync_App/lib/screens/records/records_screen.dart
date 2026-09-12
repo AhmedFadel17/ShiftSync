@@ -81,7 +81,7 @@ class RecordsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            '${weekHours.toStringAsFixed(1)}',
+                            weekHours.toStringAsFixed(1),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 42,

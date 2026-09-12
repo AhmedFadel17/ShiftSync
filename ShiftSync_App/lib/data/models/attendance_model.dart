@@ -75,41 +75,4 @@ class AttendanceModel {
       shiftName: json['shiftName'] as String?,
     );
   }
-
-  // Mock completed attendance records
-  static List<AttendanceModel> get mockHistory {
-    final now = DateTime.now();
-    return [
-      AttendanceModel(
-        id: 10, userId: 'emp-001', userShiftId: 1,
-        checkInTime: now.subtract(const Duration(days: 1, hours: 8)),
-        checkOutTime: now.subtract(const Duration(days: 1)),
-        shiftName: 'Morning Care',
-      ),
-      AttendanceModel(
-        id: 9, userId: 'emp-001', userShiftId: 1,
-        checkInTime: now.subtract(const Duration(days: 2, hours: 8)),
-        checkOutTime: now.subtract(const Duration(days: 2)),
-        shiftName: 'Morning Care',
-      ),
-      AttendanceModel(
-        id: 8, userId: 'emp-001', userShiftId: 2,
-        checkInTime: now.subtract(const Duration(days: 3, hours: 18)),
-        checkOutTime: now.subtract(const Duration(days: 3, hours: 10)),
-        shiftName: 'Evening Round',
-      ),
-      AttendanceModel(
-        id: 7, userId: 'emp-001', userShiftId: 1,
-        checkInTime: now.subtract(const Duration(days: 4, hours: 8)),
-        checkOutTime: now.subtract(const Duration(days: 4)),
-        shiftName: 'Morning Care',
-      ),
-      AttendanceModel(
-        id: 6, userId: 'emp-001', userShiftId: 1,
-        checkInTime: now.subtract(const Duration(days: 5, hours: 8)),
-        checkOutTime: now.subtract(const Duration(days: 5)),
-        shiftName: 'Morning Care',
-      ),
-    ];
-  }
 }

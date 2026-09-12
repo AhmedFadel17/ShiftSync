@@ -4,7 +4,8 @@ class ApiConstants {
   // Adjust this to match your dev machine's IP when testing on a physical device
   // For Android emulator use: http://10.0.2.2:7087
   // For physical device use: http://<your-machine-local-IP>:7087
-  static const String baseUrl = 'https://localhost:7087';
+  static const String baseUrl = 'https://truantly-toothiest-shenita.ngrok-free.dev';
+  //'https://localhost:7087';
 
   // Endpoints
   static const String login = '/api/Auth/Login';

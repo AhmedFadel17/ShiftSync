@@ -29,10 +29,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   @override
   Widget build(BuildContext context) {
     final shiftProv = context.watch<ShiftProvider>();
+    final allShifts = shiftProv.userShifts;
     final upcomingShifts = shiftProv.upcomingShifts;
 
-    // Filter shifts matching selected day
-    final selectedDayShifts = upcomingShifts
+    // Filter shifts matching selected day from all user shifts
+    final selectedDayShifts = allShifts
         .where((s) =>
             s.date.year == _selectedDay.year &&
             s.date.month == _selectedDay.month &&
@@ -64,137 +65,145 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // ── Horizontal Date Strip ──────────────────────────────────────────────
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(0, 4, 0, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    DateFormat('MMMM yyyy').format(_selectedDay),
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.onSurface,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await shiftProv.refreshAllData();
+        },
+        child: Column(
+          children: [
+            // ── Horizontal Date Strip ──────────────────────────────────────────────
+            Container(
+              color: Colors.white,
+              padding: const EdgeInsets.fromLTRB(0, 4, 0, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      DateFormat('MMMM yyyy').format(_selectedDay),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.onSurface,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  height: 76,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    itemCount: _weekDays.length,
-                    itemBuilder: (context, index) {
-                      final day = _weekDays[index];
-                      final isSelected = day.day == _selectedDay.day &&
-                          day.month == _selectedDay.month;
-                      final isToday = day.day == DateTime.now().day &&
-                          day.month == DateTime.now().month;
-                      final hasShift = upcomingShifts.any((s) =>
-                          s.date.year == day.year &&
-                          s.date.month == day.month &&
-                          s.date.day == day.day);
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 76,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      itemCount: _weekDays.length,
+                      itemBuilder: (context, index) {
+                        final day = _weekDays[index];
+                        final isSelected = day.day == _selectedDay.day &&
+                            day.month == _selectedDay.month;
+                        final isToday = day.day == DateTime.now().day &&
+                            day.month == DateTime.now().month;
+                        final hasShift = allShifts.any((s) =>
+                            s.date.year == day.year &&
+                            s.date.month == day.month &&
+                            s.date.day == day.day);
 
-                      return GestureDetector(
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          setState(() => _selectedDay = day);
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          width: 52,
-                          margin: const EdgeInsets.symmetric(horizontal: 3),
-                          decoration: BoxDecoration(
-                            gradient: isSelected ? AppColors.primaryGradient : null,
-                            color: isSelected ? null : (isToday ? AppColors.primaryContainer : Colors.transparent),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                DateFormat('EEE').format(day).toUpperCase(),
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  color: isSelected
-                                      ? Colors.white.withOpacity(0.8)
-                                      : AppColors.onSurfaceVariant,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                day.day.toString(),
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w800,
-                                  color: isSelected
-                                      ? Colors.white
-                                      : (isToday ? AppColors.primary : AppColors.onSurface),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Container(
-                                width: 5,
-                                height: 5,
-                                decoration: BoxDecoration(
-                                  color: hasShift
-                                      ? (isSelected ? Colors.white : AppColors.primary)
-                                      : Colors.transparent,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // ── Shift List ─────────────────────────────────────────────────────────
-          Expanded(
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                  sliver: selectedDayShifts.isEmpty
-                      ? SliverFillRemaining(
-                          child: _EmptyDayState(
-                            selectedDay: _selectedDay,
-                          ),
-                        )
-                      : SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: ShiftCard(
-                                userShift: selectedDayShifts[index],
-                                onSwapRequested: () {
-                                  _showSwapSheet(context, selectedDayShifts[index], shiftProv);
-                                },
-                              ),
+                        return GestureDetector(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() => _selectedDay = day);
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: 52,
+                            margin: const EdgeInsets.symmetric(horizontal: 3),
+                            decoration: BoxDecoration(
+                              gradient: isSelected ? AppColors.primaryGradient : null,
+                              color: isSelected ? null : (isToday ? AppColors.primaryContainer : Colors.transparent),
+                              borderRadius: BorderRadius.circular(14),
                             ),
-                            childCount: selectedDayShifts.length,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  DateFormat('EEE').format(day).toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    color: isSelected
+                                        ? Colors.white.withOpacity(0.8)
+                                        : AppColors.onSurfaceVariant,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  day.day.toString(),
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w800,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : (isToday ? AppColors.primary : AppColors.onSurface),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Container(
+                                  width: 5,
+                                  height: 5,
+                                  decoration: BoxDecoration(
+                                    color: hasShift
+                                        ? (isSelected ? Colors.white : AppColors.primary)
+                                        : Colors.transparent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                ),
-              ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+
+            // ── Shift List ─────────────────────────────────────────────────────────
+            Expanded(
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                    sliver: selectedDayShifts.isEmpty
+                        ? SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: _EmptyDayState(
+                              selectedDay: _selectedDay,
+                            ),
+                          )
+                        : SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) => Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: ShiftCard(
+                                  userShift: selectedDayShifts[index],
+                                  onSwapRequested: () {
+                                    _showSwapSheet(context, selectedDayShifts[index], shiftProv);
+                                  },
+                                ),
+                              ),
+                              childCount: selectedDayShifts.length,
+                            ),
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

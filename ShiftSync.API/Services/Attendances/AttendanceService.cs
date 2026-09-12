@@ -51,16 +51,25 @@ public class AttendanceService : IAttendanceService
             .FirstOrDefaultAsync(us => us.Id == dto.UserShiftId, cancellationToken)
             ?? throw new KeyNotFoundException($"UserShift with id {dto.UserShiftId} was not found.");
 
-        // Ensure shift belongs to the requesting user
-        if (userShift.UserId != userId)
-            throw new UnauthorizedAccessException("You can only check in to your own assigned shifts.");
+        var shiftStartLocal = userShift.Date.Date + userShift.Shift.StartTime;
+        var shiftEndLocal = userShift.Date.Date + userShift.Shift.EndTime;
 
-        // Grace window check: allow ±15 min from shift StartTime on the assigned Date
-        var shiftStartUtc = userShift.Date.Date + userShift.Shift.StartTime;
+        if (shiftEndLocal <= shiftStartLocal)
+        {
+            shiftEndLocal = shiftEndLocal.AddDays(1);
+        }
+
+        var earlyGraceWindow = TimeSpan.FromMinutes(15);
         var now = DateTime.UtcNow;
-        if (now < shiftStartUtc - GraceWindow || now > shiftStartUtc + GraceWindow)
-            throw new ArgumentException($"Check-in is only allowed within 15 minutes of the shift start time ({userShift.Shift.StartTime:hh\\:mm}).");
 
+
+        var nowLocal = DateTime.Now;
+
+        if (nowLocal < shiftStartLocal - earlyGraceWindow)
+            throw new ArgumentException($"Check-in is too early. You can check in starting from {shiftStartLocal - earlyGraceWindow:hh\\:mm tt}.");
+
+        if (nowLocal > shiftEndLocal)
+            throw new ArgumentException($"Shift has already ended at {shiftEndLocal:hh\\:mm tt}. Check-in is no longer allowed.");
         // Prevent double check-in
         var existingOpen = await _attendanceRepository.GetOpenAttendanceAsync(userId, dto.UserShiftId, cancellationToken);
         if (existingOpen != null)

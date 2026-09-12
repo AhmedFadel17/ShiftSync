@@ -18,21 +18,11 @@ class AuthProvider extends ChangeNotifier {
   String? get error => _error;
   bool get isAuthenticated => _token != null && _user != null;
 
-  // Set to false for live API JWT authentication
-  static const bool _useMockAuth = false;
-
   AuthProvider() {
     _initAuth();
   }
 
   Future<void> _initAuth() async {
-    if (_useMockAuth) {
-      _user = UserModel.mock;
-      _token = 'mock-dev-token';
-      notifyListeners();
-      return;
-    }
-
     final prefs = await SharedPreferences.getInstance();
     _token = prefs.getString('auth_token');
     final userJson = prefs.getString('user_data');

@@ -355,13 +355,76 @@ class _InAppAlertBanner extends StatelessWidget {
 
 // ─── Active Shift Card ────────────────────────────────────────────────────────
 
-class _ActiveShiftCard extends StatelessWidget {
+class _ActiveShiftCard extends StatefulWidget {
   final ShiftProvider shiftProv;
 
   const _ActiveShiftCard({required this.shiftProv});
 
   @override
+  State<_ActiveShiftCard> createState() => _ActiveShiftCardState();
+}
+
+class _ActiveShiftCardState extends State<_ActiveShiftCard> {
+  bool _isClockingIn = false;
+
+  Future<void> _handleClockIn() async {
+    setState(() => _isClockingIn = true);
+    try {
+      await widget.shiftProv.clockIn();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Clocked in successfully! Have a great shift.',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFF059669),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline_rounded, color: Colors.white, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  msg,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isClockingIn = false);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final shiftProv = widget.shiftProv;
     final isOnBreak = shiftProv.isOnBreak;
     final isClockedIn = shiftProv.isClockedIn;
 
@@ -629,52 +692,132 @@ class _ActiveShiftCard extends StatelessWidget {
               ],
             ),
           ] else ...[
-            // Current time display (Off Shift)
-            StreamBuilder(
-              stream: Stream.periodic(const Duration(seconds: 1)),
-              builder: (context, _) {
-                return Center(
-                  child: Text(
-                    DateFormat('hh:mm:ss a').format(DateTime.now()),
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.onSurface,
-                      letterSpacing: -1.0,
-                      fontFeatures: [FontFeature.tabularFigures()],
+            // ── Next Shift Countdown Timer ──────────────────────────────
+            Builder(
+              builder: (context) {
+                final nextShift = shiftProv.nextUpcomingShift;
+                final shift = nextShift?.shift;
+                final hasUpcoming = nextShift != null && shift != null;
+
+                return Column(
+                  children: [
+                    Center(
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryContainer,
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.timer_outlined,
+                                  size: 13,
+                                  color: AppColors.primary,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  hasUpcoming ? 'NEXT SHIFT STARTS IN' : 'LOCAL TIME',
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.primary,
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            hasUpcoming
+                                ? shiftProv.nextShiftCountdownDisplay
+                                : DateFormat('hh:mm:ss a').format(DateTime.now()),
+                            style: const TextStyle(
+                              fontSize: 38,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.primary,
+                              letterSpacing: -1.0,
+                              fontFeatures: [FontFeature.tabularFigures()],
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          if (hasUpcoming) ...[
+                            Text(
+                              '${shift.name} • ${shift.displayRange}',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              nextShift.isToday
+                                  ? 'Scheduled Today'
+                                  : 'Scheduled for ${nextShift.formattedDate}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.onSurfaceVariant.withOpacity(0.9),
+                              ),
+                            ),
+                          ] else ...[
+                            Text(
+                              'No scheduled shifts today • Ready for duty',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.onSurfaceVariant.withOpacity(0.8),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 12),
+                    Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 7,
+                            height: 7,
+                            decoration: const BoxDecoration(
+                              color: AppColors.secondary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'GPS Location Ready',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.onSurfaceVariant.withOpacity(0.8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+
+                    // Clock-In button
+                    ClockInButton(
+                      isClockedIn: false,
+                      isLoading: _isClockingIn,
+                      onClockIn: _handleClockIn,
+                      onClockOut: () {},
+                    ),
+                  ],
                 );
               },
-            ),
-            const SizedBox(height: 6),
-            Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.location_on_rounded,
-                    size: 13,
-                    color: AppColors.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 3),
-                  Text(
-                    'GPS Location Ready',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.onSurfaceVariant.withOpacity(0.8),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Clock-In button
-            ClockInButton(
-              isClockedIn: false,
-              onClockIn: () => shiftProv.clockIn(),
-              onClockOut: () {},
             ),
           ],
         ],
@@ -687,7 +830,7 @@ class _ActiveShiftCard extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _TakeBreakSheet(shiftProv: shiftProv),
+      builder: (_) => _TakeBreakSheet(shiftProv: widget.shiftProv),
     );
   }
 
@@ -698,7 +841,42 @@ class _ActiveShiftCard extends StatelessWidget {
       builder: (_) => _EndBreakSheet(
         onConfirm: () async {
           Navigator.pop(context);
-          await shiftProv.endBreak();
+          try {
+            await widget.shiftProv.endBreak();
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Row(
+                  children: [
+                    Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+                    SizedBox(width: 10),
+                    Text('Break ended. Welcome back to your shift!'),
+                  ],
+                ),
+                backgroundColor: const Color(0xFF059669),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            );
+          } catch (e) {
+            if (!context.mounted) return;
+            final msg = e.toString().replaceFirst('Exception: ', '');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.error_outline_rounded, color: Colors.white, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(msg, style: const TextStyle(fontWeight: FontWeight.w600))),
+                  ],
+                ),
+                backgroundColor: AppColors.error,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
         },
       ),
     );
@@ -709,9 +887,44 @@ class _ActiveShiftCard extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (_) => _ClockOutSheet(
-        onConfirm: () {
-          shiftProv.clockOut();
+        onConfirm: () async {
           Navigator.pop(context);
+          try {
+            await widget.shiftProv.clockOut();
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Row(
+                  children: [
+                    Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+                    SizedBox(width: 10),
+                    Text('Shift completed. You have clocked out.'),
+                  ],
+                ),
+                backgroundColor: const Color(0xFF059669),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            );
+          } catch (e) {
+            if (!context.mounted) return;
+            final msg = e.toString().replaceFirst('Exception: ', '');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.error_outline_rounded, color: Colors.white, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(msg, style: const TextStyle(fontWeight: FontWeight.w600))),
+                  ],
+                ),
+                backgroundColor: AppColors.error,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
         },
       ),
     );
@@ -945,14 +1158,35 @@ class _TakeBreakSheetState extends State<_TakeBreakSheet> {
                   ? null
                   : () async {
                       setState(() => _isSubmitting = true);
-                      await widget.shiftProv.takeBreak(
-                        _selectedType!,
-                        note: _noteCtrl.text.trim().isNotEmpty ? _noteCtrl.text.trim() : null,
-                      );
-                      if (mounted) {
+                      try {
+                        await widget.shiftProv.takeBreak(
+                          _selectedType!,
+                          note: _noteCtrl.text.trim().isNotEmpty ? _noteCtrl.text.trim() : null,
+                        );
+                        if (!context.mounted) return;
                         Navigator.pop(context);
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        setState(() => _isSubmitting = false);
+                        final msg = e.toString().replaceFirst('Exception: ', '');
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Row(
+                              children: [
+                                const Icon(Icons.error_outline_rounded, color: Colors.white, size: 20),
+                                const SizedBox(width: 10),
+                                Expanded(child: Text(msg, style: const TextStyle(fontWeight: FontWeight.w600))),
+                              ],
+                            ),
+                            backgroundColor: AppColors.error,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            duration: const Duration(seconds: 4),
+                          ),
+                        );
                       }
                     },
+
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFD97706),
                 shape: RoundedRectangleBorder(

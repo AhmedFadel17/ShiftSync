@@ -7,5 +7,5 @@ public record UpdateShiftDto
     public TimeSpan? EndTime { get; init; }
     public int? MaxAllowedBreaksDurationMinutes { get; init; }
     public int? MinActiveEmployeesRequired { get; init; }
-    public bool? IsActive { get; init; }
+    // public bool? IsActive { get; init; }
 }
