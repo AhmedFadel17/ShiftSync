@@ -136,4 +136,28 @@ public class AttendanceBreakService : IAttendanceBreakService
 
         return _mapper.Map<AttendanceBreakResponseDto>(breakRecord);
     }
+
+    public async Task<AttendanceBreakResponseDto> EndBreakAsync(string userId, int id, CancellationToken cancellationToken = default)
+    {
+        var breakRecord = await _breakRepository.Query()
+            .Include(ab => ab.BreakType)
+            .Include(ab => ab.Attendance)
+            .FirstOrDefaultAsync(ab => ab.Id == id, cancellationToken)
+            ?? throw new KeyNotFoundException($"Attendance break with id {id} was not found.");
+
+        if (breakRecord.Attendance?.UserId != userId)
+            throw new UnauthorizedAccessException("You can only end breaks for your own attendance.");
+
+        if (breakRecord.Status != BreakStatus.Approved && breakRecord.Status != BreakStatus.WaitingQueue)
+            throw new ArgumentException("Only active or queued breaks can be ended.");
+
+        breakRecord.Status = BreakStatus.Completed;
+        breakRecord.EndTime = DateTime.UtcNow;
+
+        _breakRepository.Update(breakRecord);
+        await _breakRepository.SaveChangesAsync(cancellationToken);
+
+        return _mapper.Map<AttendanceBreakResponseDto>(breakRecord);
+    }
 }
+

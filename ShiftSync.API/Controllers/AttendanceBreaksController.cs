@@ -41,6 +41,14 @@ public class AttendanceBreaksController : ApiBaseController
         return CreatedAtAction(nameof(GetById), new { id = breakRecord.Id }, ApiResponseFactory.Success(breakRecord, statusCode: 201));
     }
 
+    /// <summary>Ends the current user's active break.</summary>
+    [HttpPost("{id:int}/end")]
+    public async Task<IActionResult> EndBreak(int id, CancellationToken cancellationToken)
+    {
+        var breakRecord = await _breakService.EndBreakAsync(CurrentUserId!, id, cancellationToken);
+        return Ok(ApiResponseFactory.Success(breakRecord));
+    }
+
     /// <summary>Updates the status of a break (Approve / Reject / Complete). Admin only.</summary>
     [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}/status")]
@@ -50,3 +58,4 @@ public class AttendanceBreaksController : ApiBaseController
         return Ok(ApiResponseFactory.Success(breakRecord));
     }
 }
+

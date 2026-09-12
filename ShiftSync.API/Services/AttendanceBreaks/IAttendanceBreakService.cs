@@ -9,4 +9,6 @@ public interface IAttendanceBreakService
     Task<AttendanceBreakResponseDto> GetByIdAsync(int id, CancellationToken cancellationToken = default);
     Task<AttendanceBreakResponseDto> RequestBreakAsync(string userId, RequestBreakDto dto, CancellationToken cancellationToken = default);
     Task<AttendanceBreakResponseDto> UpdateStatusAsync(int id, UpdateBreakStatusDto dto, CancellationToken cancellationToken = default);
+    Task<AttendanceBreakResponseDto> EndBreakAsync(string userId, int id, CancellationToken cancellationToken = default);
 }
+
