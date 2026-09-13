@@ -12,9 +12,9 @@ export const usersApi = mainApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.data.items.map(({ id }) => ({ type: 'User' as const, id })),
-              { type: 'User', id: 'LIST' },
-            ]
+            ...result.data.items.map(({ id }) => ({ type: 'User' as const, id })),
+            { type: 'User', id: 'LIST' },
+          ]
           : [{ type: 'User', id: 'LIST' }],
     }),
     getUserById: builder.query<ApiResponse<User>, string>({
@@ -39,6 +39,13 @@ export const usersApi = mainApi.injectEndpoints({
       }),
       invalidatesTags: [{ type: 'User', id: 'LIST' }],
     }),
+    restoreUser: builder.mutation<ApiResponse<void>, string>({
+      query: (id) => ({
+        url: `/api/Users/${id}/restore`,
+        method: 'PUT',
+      }),
+      invalidatesTags: [{ type: 'User', id: 'LIST' }],
+    }),
   }),
 });
 
@@ -47,4 +54,5 @@ export const {
   useGetUserByIdQuery,
   useUpdateUserMutation,
   useDeleteUserMutation,
+  useRestoreUserMutation,
 } = usersApi;

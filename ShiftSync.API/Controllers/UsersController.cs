@@ -35,6 +35,14 @@ public class UsersController : ApiBaseController
         return Ok(ApiResponseFactory.Success(user));
     }
 
+    /// <summary>Restores a deleted user shift assignment. Admin only.</summary>
+    [Authorize(Roles = "Admin")]
+    [HttpPut("{id}/restore")]
+    public async Task<IActionResult> Restore(string id, CancellationToken cancellationToken)
+    {
+        await _userService.RestoreAsync(id, cancellationToken);
+        return Ok(ApiResponseFactory.Success<object?>(null, "User restored successfully."));
+    }
 
     /// <summary>Deletes a user shift assignment (only if no attendance exists). Admin only.</summary>
     [Authorize(Roles = "Admin")]

@@ -10,4 +10,5 @@ public interface IUserService
     Task<PaginationSource<UserResponseDto>> GetPagedAsync(UserFilterDto filter, CancellationToken cancellationToken = default);
     Task<UserResponseDto> GetByIdAsync(string id, CancellationToken cancellationToken);
     Task DeleteAsync(string id, CancellationToken cancellationToken);
+    Task RestoreAsync(string id, CancellationToken cancellationToken = default);
 }

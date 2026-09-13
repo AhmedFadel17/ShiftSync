@@ -48,4 +48,15 @@ public class UserService : IUserService
         _userRepository.Update(user);
         await _userRepository.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task RestoreAsync(string id, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.Query()
+            .FirstOrDefaultAsync(s => s.Id == id, cancellationToken)
+            ?? throw new KeyNotFoundException($"User with id {id} was not found.");
+
+        user.IsActive = true;
+        _userRepository.Update(user);
+        await _userRepository.SaveChangesAsync(cancellationToken);
+    }
 }

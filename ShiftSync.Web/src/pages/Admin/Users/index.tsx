@@ -4,6 +4,7 @@ import {
   useGetUsersQuery,
   useUpdateUserMutation,
   useDeleteUserMutation,
+  useRestoreUserMutation,
 } from '@/store/apis';
 import { User, UserRole, UpdateUserDto } from '@/types/shiftsync';
 import { RoleBadge, IsActiveBadge } from '@/components/ui/Badges/StatusBadge';
@@ -38,6 +39,8 @@ export default function UsersPage() {
 
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
+  const [restoreUser, { isLoading: isRestoring }] = useRestoreUserMutation();
+
 
   const users = data?.data?.items ?? [];
   const totalCount = data?.data?.totalCount ?? 0;
@@ -76,6 +79,15 @@ export default function UsersPage() {
       setDeletingUser(null);
     } catch (err: any) {
       toast.error(err?.data?.message || 'Failed to delete user');
+    }
+  };
+
+  const handleRestore = async (id: string) => {
+    try {
+      await restoreUser(id).unwrap();
+      toast.success(`User restored successfully`);
+    } catch (err: any) {
+      toast.error(err?.data?.message || 'Failed to restore user');
     }
   };
 
@@ -230,15 +242,25 @@ export default function UsersPage() {
                       >
                         <span className="material-symbols-outlined text-[16px]">account_circle</span>
                       </Link>
-
-                      <button
-                        onClick={() => setDeletingUser(u)}
-                        className="p-1.5 rounded-lg bg-surface-container-low hover:bg-error-container text-on-surface-variant hover:text-error transition-colors inline-flex items-center justify-center shadow-xs"
-                        title="Delete User"
-                        type="button"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">delete</span>
-                      </button>
+                      {u.isActive ? (
+                        <button
+                          onClick={() => setDeletingUser(u)}
+                          className="p-1.5 rounded-lg cursor-pointer bg-surface-container-low hover:bg-error-container text-on-surface-variant hover:text-error transition-colors inline-flex items-center justify-center shadow-xs"
+                          title="Delete User"
+                          type="button"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">delete</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleRestore(u.id)}
+                          className="p-1.5 rounded-lg cursor-pointer bg-surface-container-low hover:bg-success-container text-on-surface-variant hover:text-success transition-colors inline-flex items-center justify-center shadow-xs"
+                          title="Restore User"
+                          type="button"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">restore</span>
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))
